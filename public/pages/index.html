@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <!-- <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet"> -->
 </head>
 
-<body>
+<body style="margin: 0; user-select: none;">
     <div id="home">
         <input type="text" id="playerNameInput" class="h-100 w-100">
         <button id="startGameButton">Enter matchmaking</button>
     </div>
     <div id="game">
+        <div id="elements"></div>
+        <div id="shots"></div>
     </div>
     <div id="scoreBoard">
+        <div>
+            <div id="scoreOfAllPlayers"></div>
+            <button id="backToHomeButton">Back to home page</button>
+        </div>
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/scripts/client.js"></script>
