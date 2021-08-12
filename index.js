@@ -36,7 +36,7 @@ class Player {
         this.width = 10;
         this.ratio = 1; // ratio of width = ratio*height
         this.scope = 50000; // gives the area that can be seen;
-        this.keyPressMove = 1; // move when key w-a-s-d pressed
+        this.keyPressMove = 0.1; // move when key w-a-s-d pressed
         this.exists = true; // defines whether player exists
         this.life = 100; // defines initial life
         this.x;
@@ -44,6 +44,7 @@ class Player {
         this.weapon = 0; // originally no weapon is equipped
         this.playerName = "BuzzDroner"; // default name
         this.immortal = false;
+        this.removed = false; // indicated whether element has been removed of player view
     }
     // string png to be used locally
     code() {
@@ -52,7 +53,7 @@ class Player {
     receiveKeyPress(key) {
         console.log('key press received');
         switch (key) {
-            case 119: // up
+            case 87: // up
                 var xProposed = this.x;
                 var yProposed = this.y;
                 xProposed -= this.keyPressMove;
@@ -61,7 +62,7 @@ class Player {
                     this.y = yProposed;
                 }
                 break;
-            case 100: // right
+            case 68: // right
                 var xProposed = this.x;
                 var yProposed = this.y;
                 yProposed += this.keyPressMove;
@@ -70,7 +71,7 @@ class Player {
                     this.y = yProposed;
                 }
                 break;
-            case 115: // down
+            case 83: // down
                 var xProposed = this.x;
                 var yProposed = this.y;
                 xProposed += this.keyPressMove;
@@ -79,7 +80,7 @@ class Player {
                     this.y = yProposed;
                 }
                 break;
-            case 97: // left
+            case 65: // left
                 var xProposed = this.x;
                 var yProposed = this.y;
                 yProposed -= this.keyPressMove;
@@ -109,9 +110,15 @@ class Match {
         this.activePlayerCount = 0; // players who are not dead and not disconnected
     }
     refreshView() {
+        // this.elements.forEach(function(i) {
+        //     if (!i.immortal && i.life == 0 && !i.removed) {
+
+        //     }
+        // });
         for (var i = 0; i < this.players.length; i++) if (this.players[i].exists) {
-            io.to(this.players[i].id).emit('sendUserScreenRatio');
             io.to(this.players[i].id).emit('updateLife', this.players[i].life);
+            if (this.players[i] == undefined) continue; // strange bug
+            io.to(this.players[i].id).emit('sendUserScreenRatio');
             var actualHeight = Math.sqrt(this.players[i].scope/this.players[i].ratio);
             var actualWidth = actualHeight*this.players[i].ratio;
             for (var j = 0; j < this.elements.length; j++) if (this.elements[j].exists) {
@@ -144,6 +151,7 @@ class Match {
         for (var i = x; i < this.elements.length; i++) this.elements[i] = this.elements[i+1];
         this.elements.pop();
         this.activePlayerCount--;
+        io.to(this.matchNumber).emit('removeElementFromGameView', player.id);
     }
     // looks for closest element to (x1, y1) that intersect with line [(x1, y1), (x2, y2)] and takes life from it
     processShot(x1, y1, x2, y2, shooter) {
@@ -206,7 +214,7 @@ io.on('connection', (socket) => {
         thisPlayer = new Player(socket.id);
         selectedMatch = matches[0];
         selectedMatch.addPlayer(thisPlayer);
-        socket.join(toString(selectedMatch.matchNumber));
+        socket.join(selectedMatch.matchNumber);
     });
     // updates thisPlayer.ratio
     socket.on('user_screen_ratio', (localRatio) => {
@@ -216,6 +224,7 @@ io.on('connection', (socket) => {
         thisPlayer.receiveKeyPress(key);
     });
     socket.on('game_finished_for_player', () => {
+        socket.leave(selectedMatch.matchNumber);
         thisPlayer.exists = false;
         selectedMatch.removePlayer(thisPlayer);
     });
@@ -245,6 +254,6 @@ server.listen(3000, () => {
     console.log('listening on *:3000');
 });
 
-setInterval(refreshViewAllMatches, 1);
+setInterval(refreshViewAllMatches, 10);
 var matches = [];
 matches.push(new Match());
