@@ -47,8 +47,7 @@ class Player {
     }
     // string png to be used locally
     code() {
-        if (this.life > 30) return 'items/drone';
-        else return 'items/drone_low';
+        return 'items/drone';
     }
     receiveKeyPress(key) {
         console.log('key press received');
@@ -106,23 +105,22 @@ class Match {
         this.matchNumber = 0;
         this.players = [];
         this.elements = [];
-        this.elements.push(new Background());
+        // this.elements.push(new Background());
         this.activePlayerCount = 0; // players who are not dead and not disconnected
     }
     refreshView() {
-        io.to(toString(this.matchNumber)).emit('resetGameView');
         for (var i = 0; i < this.players.length; i++) if (this.players[i].exists) {
             io.to(this.players[i].id).emit('sendUserScreenRatio');
+            io.to(this.players[i].id).emit('updateLife', this.players[i].life);
             var actualHeight = Math.sqrt(this.players[i].scope/this.players[i].ratio);
             var actualWidth = actualHeight*this.players[i].ratio;
             for (var j = 0; j < this.elements.length; j++) if (this.elements[j].exists) {
                 var fromTop = (this.elements[j].x-(this.players[i].x-actualHeight/2))/actualHeight*100;
                 var fromLeft = (this.elements[j].y-(this.players[i].y-actualWidth/2))/actualWidth*100;
                 // console.log(i.id);
-                io.to(this.players[i].id).emit('addElementToGameView', Number(fromTop), Number(fromLeft), this.elements[j].height/actualHeight*100, this.elements[j].width/actualWidth*100, this.elements[j].code());
+                io.to(this.players[i].id).emit('addElementToGameView', Number(fromTop), Number(fromLeft), this.elements[j].height/actualHeight*100, this.elements[j].width/actualWidth*100, this.elements[j].code(), this.elements[j].id);
             }
         }
-        io.to(toString(this.matchNumber)).emit('resetGameViewFinished');
     }
     calculateFreeCoordinates() {
         return [50, 50];
@@ -149,25 +147,31 @@ class Match {
     }
     // looks for closest element to (x1, y1) that intersect with line [(x1, y1), (x2, y2)] and takes life from it
     processShot(x1, y1, x2, y2, shooter) {
-        this.players.forEach(function(i) {
-            var actualHeight = Math.sqrt(i.scope/i.ratio);
-            var actualWidth = actualHeight*i.ratio;
-            var fromTopX1 = (x1-(i.x-actualHeight/2))/actualHeight*100;
-            var fromLeftY1 = (y1-(i.y-actualWidth/2))/actualWidth*100;
-            var fromTopX2 = (x2-(i.x-actualHeight/2))/actualHeight*100;
-            var fromLeftY2 = (y2-(i.y-actualWidth/2))/actualWidth*100;
-            io.to(i.id).emit('shotFired', fromTopX1, fromLeftY1, fromTopX2, fromLeftY2, 10000);
-        });
         var smallestDistance = totalHeight+totalWidth;
         var selectedElement = -1;
         this.elements.forEach(function(i) {
             // check whether diagonals intersect
-            if (!i.immortal && i.id != shooter.id && (classicFunctions.lineSegmentIntersect(x1, y1, x2, y2, i.x-i.height/2, i.y-i.width/2) || classicFunctions.lineSegmentIntersect(x1, y2, x2, y2, i.x-i.height/2, i.y+i.width/2, i.x+i.height/2, i.y-i.height/2))) {
+            if (!i.immortal && i.id != shooter.id && (classicFunctions.lineSegmentIntersect(x1, y1, x2, y2, i.x-i.height/2, i.y-i.width/2, i.x+i.height/2, i.y+i.height/2) || classicFunctions.lineSegmentIntersect(x1, y1, x2, y2, i.x-i.height/2, i.y+i.width/2, i.x+i.height/2, i.y-i.height/2))) {
                 if (classicFunctions.pointDistance(i.x, i.y, x1, y1) < smallestDistance) {
                     smallestDistance = classicFunctions.pointDistance(i.x, i.y, x1, y1);
                     selectedElement = i;
                 }
             }
+        });
+        this.players.forEach(function(i) {
+            var actualHeight = Math.sqrt(i.scope/i.ratio);
+            var actualWidth = actualHeight*i.ratio;
+            var fromTopX1 = (x1-(i.x-actualHeight/2))/actualHeight*100;
+            var fromLeftY1 = (y1-(i.y-actualWidth/2))/actualWidth*100;
+            if (selectedElement == -1) {
+                var fromTopX2 = (x2-(i.x-actualHeight/2))/actualHeight*100;
+                var fromLeftY2 = (y2-(i.y-actualWidth/2))/actualWidth*100;
+            }
+            else {
+                var fromTopX2 = (selectedElement.x-(i.x-actualHeight/2))/actualHeight*100;
+                var fromLeftY2 = (selectedElement.y-(i.y-actualWidth/2))/actualWidth*100;
+            }
+            io.to(i.id).emit('shotFired', fromTopX1, fromLeftY1, fromTopX2, fromLeftY2, 10000);
         });
         if (selectedElement != -1) {
             selectedElement.reduceLife(5);
@@ -241,6 +245,6 @@ server.listen(3000, () => {
     console.log('listening on *:3000');
 });
 
-setInterval(refreshViewAllMatches, 200);
+setInterval(refreshViewAllMatches, 1);
 var matches = [];
 matches.push(new Match());

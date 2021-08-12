@@ -62,45 +62,37 @@ function percentageWidthToPixel(x) {
     return (x*window.innerWidth)/100;
 }
 
-// removes all elements in the game view & update canvas height, width
-socket.on('resetGameView', () => {
-    removedGameChildCount = document.getElementById('elements').childElementCount;
-    // console.log('D');
-});
-
 // adds an element to the game view in terms of percentages
-socket.on('addElementToGameView', (top, left, targetHeight, targetWidth, source) => {
+socket.on('addElementToGameView', (top, left, targetHeight, targetWidth, source, id) => {
     // console.log('E');
-    var newElement = document.createElement('img');
-    newElement.setAttribute('src', '/images/'+source+'.png');
+    var element = document.getElementById(id);
+    if (element == null) {
+        element = document.createElement('img');
+        element.id = id;
+        element.setAttribute('src', '/images/'+source+'.png');
+        document.getElementById('elements').appendChild(element);
+    }
     var proposedHeight = (targetHeight*window.innerHeight)/100;
     var proposedWidth = (targetWidth*window.innerWidth)/100;
-    newElement.setAttribute('height', proposedHeight);
-    newElement.setAttribute('width', proposedWidth);
+    element.setAttribute('height', proposedHeight);
+    element.setAttribute('width', proposedWidth);
     var topOffset = top-targetHeight/2;
     var leftOffset = left-targetWidth/2;
-    var styleAssign = 'object-fit:fill; position: absolute; top: '+topOffset+'%; left: '+leftOffset+'%;';
-    newElement.style = styleAssign;
-    document.getElementById('elements').appendChild(newElement);
-});
-
-socket.on('resetGameViewFinished', () => {
-    for (var i = 0; i < removedGameChildCount; i++) {
-        var firstChild = document.getElementById('elements').firstChild;
-        document.getElementById('elements').removeChild(firstChild);
-    }
+    var styleAssign = 'z-index: -1; object-fit:fill; position: absolute; top: '+topOffset+'%; left: '+leftOffset+'%;';
+    element.style = styleAssign;
 });
 
 socket.on('shotFired', (x1, y1, x2, y2) => {
     var shotCanvas = document.createElement('canvas');
-    shotCanvas.id = toString(x1)+toString(y1)+toString(x2)+toString(y2)+toString(Math.random()); // a good hash
-    document.getElementById('game').appendChild(shotCanvas);
+    shotCanvas.style.zIndex = 50;
+    shotCanvas.id = x1+y1+x2+y2+Math.random(); // a good hash
+    document.getElementById('shots').appendChild(shotCanvas);
     x1 = percentageHeightToPixel(x1);
     y1 = percentageWidthToPixel(y1);
     x2 = percentageHeightToPixel(x2);
     y2 = percentageWidthToPixel(y2);
     var alpha = 0;
-    var delta = 0.04;
+    var delta = 0.08;
     var line = shotCanvas.getContext('2d');
     var interval = setInterval(display, 1);
     function display() {
@@ -113,17 +105,23 @@ socket.on('shotFired', (x1, y1, x2, y2) => {
         }
         else if (alpha <= 0) {
             clearInterval(interval);
-            document.getElementById('game').removeChild(shotCanvas);
+            document.getElementById('shots').removeChild(shotCanvas);
             return;
         }
         line.clearRect(x1, y1, x2, y2);
         line.beginPath();
         line.moveTo(y1, x1);
         line.lineTo(y2, x2);
-        line.lineWidth = 5;
+        line.lineWidth = 2;
         line.globalAlpha = alpha;
+        line.strokeStyle = '#ff0000';
         line.stroke();
     }
+});
+
+socket.on('updateLife', (newLife) => {
+    document.getElementById('lifeLevel').style.width = newLife+'%';
+    document.getElementById('lifeText').innerHTML = 'Life: '+newLife;
 });
 
 socket.on('gameFinishedForPlayer', () => {
