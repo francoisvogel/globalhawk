@@ -131,7 +131,7 @@ socket.on('removeElementFromGameView', (id) => {
 
 socket.on('shotFired', (x1, y1, x2, y2) => {
     var shotCanvas = document.createElement('canvas');
-    shotCanvas.style.zIndex = 50;
+    shotCanvas.style.zIndex = 10;
     shotCanvas.id = x1 + y1 + x2 + y2 + Math.random(); // s good hash
     document.getElementById('shots').appendChild(shotCanvas);
     x1 = percentageHeightToPixel(x1);
@@ -192,6 +192,10 @@ socket.on('gameFinishedForPlayer', () => {
     socket.emit('game_finished_for_player');
     setScoreBoard();
     setState(2);
+});
+
+socket.on('updatePlayerCount', (playerCount) => {
+    
 });
 
 socket.on('launchHome', () => {

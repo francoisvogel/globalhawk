@@ -32,11 +32,11 @@ class Background {
 class Player {
     constructor(localID) {
         this.id = localID;
-        this.height = 10;
-        this.width = 10;
+        this.height = 500;
+        this.width = 500;
         this.ratio = 1; // ratio of width = ratio*height
-        this.scope = 50000; // gives the area that can be seen;
-        this.keyPressMove = 0.1; // move when key w-a-s-d pressed
+        this.scope = 100000000; // gives the area that can be seen;
+        this.keyPressMove = 100; // move when key w-a-s-d pressed
         this.exists = true; // defines whether player exists
         this.life = 100; // defines initial life
         this.x;
@@ -106,7 +106,7 @@ class Match {
         this.matchNumber = 0;
         this.players = [];
         this.elements = [];
-        // this.elements.push(new Background());
+        this.elements.push(new Background());
         this.activePlayerCount = 0; // players who are not dead and not disconnected
     }
     refreshView() {
@@ -130,7 +130,7 @@ class Match {
         }
     }
     calculateFreeCoordinates() {
-        return [50, 50];
+        return [1000, 1000];
     }
     addPlayer(player) {
         this.players.push(player);
@@ -200,9 +200,9 @@ app.get('/', (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 io.on('connection', (socket) => {
+    socket.emit('launchHome');
     var thisPlayer = null;
     var selectedMatch;
-    socket.emit('launchHome');
     socket.on('player_name_set', (arg) => {
         console.log('player_name_set');
         if (arg != undefined) {
