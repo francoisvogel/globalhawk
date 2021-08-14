@@ -4,25 +4,39 @@
 <head>
     <!-- <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet"> -->
     <link rel="stylesheet" href="./style/global.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 
 <body style="margin: 0; user-select: none;">
     <div id="home">
-        <input type="text" id="playerNameInput">
+        <input type="text" id="playerNameInput" placeholder="Enter your name" maxlength="20">
         <button id="startGameButton">Enter matchmaking</button>
     </div>
     <div id="game">
         <div id="elements" style="z-index: -1"></div>
         <div id="shots" style="z-index: 50"></div>
-        <div
-            style="z-index: 20; position: absolute; left: 20%; bottom: 20px; width: 60%; height: 15px; background-color: black; border: 2px solid black; border-radius: 100px; opacity: 80%">
-            <p id="lifeText" style="position: absolute; top: 0; color:white; left: 8px; font-size: 13px;"></p>
-            <div id="lifeLevel" style="height: 100%; border-radius: 100px;"></div>
-        </div>
-        <div>
-        <div>
-            <p style="">
-        </div>
+        <div id="ui">
+            <div
+                style="z-index: 20; position: absolute; left: 20%; bottom: 20px; width: 60%; height: 15px; background-color: black; border: 2px solid black; border-radius: 100px; opacity: 80%">
+                <p id="lifeText" style="position: absolute; top: 0; color:white; left: 8px; font-size: 13px;"></p>
+                <div id="lifeLevel" style="height: 100%; border-radius: 100px;"></div>
+            </div>
+            <div style="opacity: 80%; width: 300px; max-height: 30%; overflow: hidden; position: absolute; top: 1%; right: 1%;">
+                <div style="text-align: center; display: flex; flex-direction: row; justify-content: space-around;">
+                    <div style="border-radius: 20px; background-color: gainsboro; padding: 5px; min-width: 100px;">
+                        <p id="playerCount" style="font-size: 40px;"></p>
+                        <p style="font-size: 15px;">players</p>
+                    </div>
+                    <div style="border-radius: 20px; background-color: gainsboro; padding: 5px; min-width: 100px;">
+                        <p id="destroyedCount" style="font-size: 40px;"></p>
+                        <p style="font-size: 15px;">destroyed</p>
+                    </div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <input type="text" id="chatInput" placeholder="Enter a message" maxlength="100" style="width: 100%">
+                    <div id="chat"></div>
+                </div>
+            </div>
         </div>
     </div>
     <div id="scoreBoard">

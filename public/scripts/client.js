@@ -6,6 +6,7 @@ var redRGBLifeBarColor = 230; // global variable for a very particular use in up
 var redRGBLifeBarColorDelta = 3; // same thing as redRGBLifeBarColor
 var redRGBLifeBarColorActivated = false; // same thing as just above
 var pressed = {}; // remembers whether which keys are pressed
+var lastInput = 0;
 
 function setScoreBoard() {
 
@@ -35,6 +36,10 @@ function setState(localState) {
             document.getElementById('scoreBoard').style = generalStatesStyle + ' visibility: hidden;';
             break;
         case 1:
+            document.getElementById('chatInput').value = "";
+            document.getElementById('shots').innerHTML = "";
+            document.getElementById('elements').innerHTML = "";
+            document.getElementById('chat').innerHTML = "";
             document.getElementById('home').style = generalStatesStyle + ' visibility: hidden;';
             document.getElementById('game').style = generalStatesStyle + ' visibility: visible;';
             document.getElementById('scoreBoard').style = generalStatesStyle + ' visibility: hidden;';
@@ -68,7 +73,8 @@ function keyReact(e) {
 }
 
 function keyStatusServerCommunication() {
-    if (state != 1) return;
+    var chatInput = document.getElementById('chatInput');
+    if (state != 1 || document.activeElement == chatInput) return;
     if (pressed['W'.charCodeAt(0)]) {
         socket.emit('key_pressed', 'W'.charCodeAt(0));
     }
@@ -84,6 +90,9 @@ function keyStatusServerCommunication() {
 }
 
 function userClicked() {
+    if ($('#ui:hover').length != 0) {
+        return;
+    }
     var mouseX = event.clientY; // normal that width and height should be inverted (ref. project standards)
     var mouseY = event.clientX;
     var compareX = window.innerHeight / 2;
@@ -102,6 +111,11 @@ function percentageHeightToPixel(x) {
 
 function percentageWidthToPixel(x) {
     return (x * window.innerWidth) / 100;
+}
+
+function chatInput() {
+    if (status != 1) return;
+    var userInput = document.getElementById('userInput');
 }
 
 // adds an element to the game view in terms of percentages
@@ -126,7 +140,7 @@ socket.on('addElementToGameView', (top, left, targetHeight, targetWidth, source,
 
 socket.on('removeElementFromGameView', (id) => {
     var toRemove = document.getElementById(id);
-    document.getElementById('elements').removeChild(toRemove);
+    if (toRemove != undefined) document.getElementById('elements').removeChild(toRemove);
 });
 
 socket.on('shotFired', (x1, y1, x2, y2) => {
@@ -195,7 +209,11 @@ socket.on('gameFinishedForPlayer', () => {
 });
 
 socket.on('updatePlayerCount', (playerCount) => {
-    
+    document.getElementById('playerCount').innerHTML = playerCount;
+});
+
+socket.on('updateDestroyedCount', (destroyedCount) => {
+    document.getElementById('destroyedCount').innerHTML = destroyedCount;
 });
 
 socket.on('launchHome', () => {
@@ -206,9 +224,30 @@ socket.on('sendUserScreenRatio', () => {
     socket.emit('user_screen_ratio', window.innerWidth / window.innerHeight);
 });
 
+socket.on('addChatComment', (author, content) => {
+    var newElement = document.createElement('div');
+    newElement.style = "margin-top: 5px; font-size: 15px; overflow: hidden;";
+    var boldPart = document.createElement('b');
+    boldPart.innerHTML = author + ': ';
+    newElement.appendChild(boldPart);
+    var normalPart = document.createElement('span');
+    normalPart.innerHTML = content;
+    newElement.appendChild(normalPart);
+    document.getElementById('chat').insertBefore(newElement, document.getElementById('chat').firstChild);
+});
+
 document.getElementById('startGameButton').onclick = function () { startGameButtonPressed() };
 document.getElementById('game').addEventListener('click', userClicked);
+document.getElementById('chatInput').addEventListener('keyup', function (e) {
+    if (Date.now()-lastInput > 3000 && state == 1 && e.keyCode == 13) {
+        lastInput = Date.now();
+        socket.emit('chat_message_sent', $('#chatInput').val());
+        console.log($('#chatInput').val());
+        $('#chatInput').val("");
+    }
+});
 onkeydown = onkeyup = keyReact;
 
 setInterval(setLifeBarColor, 10);
 setInterval(keyStatusServerCommunication, 1);
+setInterval(chatInput, 10);

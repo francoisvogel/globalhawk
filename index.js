@@ -1,6 +1,7 @@
 const fs = require('fs');
 var gifyParse = require('gify-parse');
 const classicFunctions = require('./server/classicFunctions');
+const profanatoryDetector = require('./server/profanatory.js');
 const express = require('express');
 const app = express();
 const http = require('http');
@@ -8,6 +9,7 @@ const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server);
 const path = require('path');
+const { type } = require('jquery');
 // const jsdom = require('jsdom');
 // const dom = new jsdom.JSDOM("");
 // const jquery = require('jquery')(dom.window);
@@ -23,6 +25,7 @@ class Background {
         this.x = totalHeight/2;
         this.y = totalWidth/2;
         this.immortal = true;
+        this.static = true;
     }
     code() {
         return 'backgrounds/green';
@@ -45,6 +48,8 @@ class Player {
         this.playerName = "BuzzDroner"; // default name
         this.immortal = false;
         this.removed = false; // indicated whether element has been removed of player view
+        this.destroyedCount = 0; // nb of killed players
+        this.static = false;
     }
     // string png to be used locally
     code() {
@@ -92,12 +97,15 @@ class Player {
         }
         console.log(this.x+' '+this.y);
     }
+    // returns true if player is killed
     reduceLife(reducedByValue) {
         this.life = Math.max(0, this.life-reducedByValue);
         if (this.life == 0) {
             io.to(this.id).emit('gameFinishedForPlayer');
+            return true;
         }
         console.log('life: '+this.life);
+        return false;
     }
 }
 
@@ -110,11 +118,12 @@ class Match {
         this.activePlayerCount = 0; // players who are not dead and not disconnected
     }
     refreshView() {
-        // this.elements.forEach(function(i) {
-        //     if (!i.immortal && i.life == 0 && !i.removed) {
-
-        //     }
-        // });
+        this.elements.forEach(function(i) {
+            if (!i.immortal && i.life == 0 && !i.removed) {
+                io.emit('removeElementFromGameView', i.id);
+                i.removed = true;
+            }
+        });
         for (var i = 0; i < this.players.length; i++) if (this.players[i].exists) {
             io.to(this.players[i].id).emit('updateLife', this.players[i].life);
             if (this.players[i] == undefined) continue; // strange bug
@@ -139,6 +148,8 @@ class Match {
         player.x = coordinates[0];
         player.y = coordinates[1];
         this.activePlayerCount++;
+        io.to(this.matchNumber).emit('updatePlayerCount', this.players.length);
+        io.to(this.matchNumber).emit('addChatComment', 'system', player.playerName+' joined the match.');
     }
     removePlayer(player) {
         console.log('player removed');
@@ -151,7 +162,9 @@ class Match {
         for (var i = x; i < this.elements.length; i++) this.elements[i] = this.elements[i+1];
         this.elements.pop();
         this.activePlayerCount--;
-        io.to(this.matchNumber).emit('removeElementFromGameView', player.id);
+        // io.to(this.matchNumber).emit('removeElementFromGameView', player.id); // not needed any more
+        io.to(this.matchNumber).emit('updatePlayerCount', this.players.length);
+        io.to(this.matchNumber).emit('addChatComment', 'system', player.playerName+' left the match.');
     }
     // looks for closest element to (x1, y1) that intersect with line [(x1, y1), (x2, y2)] and takes life from it
     processShot(x1, y1, x2, y2, shooter) {
@@ -159,7 +172,7 @@ class Match {
         var selectedElement = -1;
         this.elements.forEach(function(i) {
             // check whether diagonals intersect
-            if (!i.immortal && i.id != shooter.id && (classicFunctions.lineSegmentIntersect(x1, y1, x2, y2, i.x-i.height/2, i.y-i.width/2, i.x+i.height/2, i.y+i.height/2) || classicFunctions.lineSegmentIntersect(x1, y1, x2, y2, i.x-i.height/2, i.y+i.width/2, i.x+i.height/2, i.y-i.height/2))) {
+            if (!i.static && i.id != shooter.id && (classicFunctions.lineSegmentIntersect(x1, y1, x2, y2, i.x-i.height/2, i.y-i.width/2, i.x+i.height/2, i.y+i.height/2) || classicFunctions.lineSegmentIntersect(x1, y1, x2, y2, i.x-i.height/2, i.y+i.width/2, i.x+i.height/2, i.y-i.height/2))) {
                 if (classicFunctions.pointDistance(i.x, i.y, x1, y1) < smallestDistance) {
                     smallestDistance = classicFunctions.pointDistance(i.x, i.y, x1, y1);
                     selectedElement = i;
@@ -181,8 +194,13 @@ class Match {
             }
             io.to(i.id).emit('shotFired', fromTopX1, fromLeftY1, fromTopX2, fromLeftY2, 10000);
         });
-        if (selectedElement != -1) {
-            selectedElement.reduceLife(5);
+        if (selectedElement != -1 && !selectedElement.immortal) {
+            selectedElement.reduceLife(10);
+            if (selectedElement.life == 0 && selectedElement.constructor.name == 'Player') {
+                shooter.destroyedCount++;
+                io.to(shooter.id).emit('updateDestroyedCount', shooter.destroyedCount);
+                io.to(this.matchNumber).emit('addChatComment', 'system', shooter.playerName+' destroyed '+selectedElement.playerName+'.');
+            }
         }
     }
 }
@@ -202,10 +220,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 io.on('connection', (socket) => {
     socket.emit('launchHome');
     var thisPlayer = null;
-    var selectedMatch;
+    var selectedMatch;   
     socket.on('player_name_set', (arg) => {
         console.log('player_name_set');
-        if (arg != undefined) {
+        if (arg != "") {
             thisPlayer.playerName = arg;
         }
     });
@@ -213,8 +231,9 @@ io.on('connection', (socket) => {
         console.log('game_start_button_pressed');
         thisPlayer = new Player(socket.id);
         selectedMatch = matches[0];
-        selectedMatch.addPlayer(thisPlayer);
         socket.join(selectedMatch.matchNumber);
+        selectedMatch.addPlayer(thisPlayer);
+        socket.emit('updateDestroyedCount', thisPlayer.destroyedCount);
     });
     // updates thisPlayer.ratio
     socket.on('user_screen_ratio', (localRatio) => {
@@ -247,6 +266,12 @@ io.on('connection', (socket) => {
         var secondX = thisPlayer.x+xDir*k;
         var secondY = thisPlayer.y+yDir*k;
         selectedMatch.processShot(thisPlayer.x, thisPlayer.y, secondX, secondY, thisPlayer);
+    });
+    socket.on('chat_message_sent', (message) => {
+        if (profanatoryDetector.isProfanatory(message)) {
+            io.to(thisPlayer.id).emit('addChatComment', 'system', 'Please remain respectful and polite at all times. Check the Code of Conduct for more details.');
+        }
+        io.to(selectedMatch.matchNumber).emit('addChatComment', thisPlayer.playerName, message);
     });
 });
 
