@@ -8,10 +8,6 @@ var redRGBLifeBarColorActivated = false; // same thing as just above
 var pressed = {}; // remembers whether which keys are pressed
 var lastInput = 0;
 
-function setScoreBoard() {
-
-}
-
 function setLifeBarColor() {
     if (!redRGBLifeBarColorActivated) return;
     console.log('called');
@@ -138,10 +134,20 @@ socket.on('removeElementFromGameView', (id) => {
     if (toRemove != undefined) document.getElementById('elements').removeChild(toRemove);
 });
 
+socket.on('updateLightning', (x, y, radius) => { // all given in percent
+    var actualRadius = radius*100;
+    x -= actualRadius/2;
+    y -= actualRadius/2;
+    document.getElementById('lightning').style.top = x+'%';
+    document.getElementById('lightning').style.left = y+'%';
+    document.getElementById('lightning').style.height = actualRadius+'%';
+    document.getElementById('lightning').style.width = actualRadius+'%';
+});
+
 socket.on('shotFired', (x1, y1, x2, y2) => {
     var shotCanvas = document.createElement('canvas');
     shotCanvas.style.zIndex = 10;
-    shotCanvas.id = x1 + y1 + x2 + y2 + Math.random(); // s good hash
+    shotCanvas.id = x1 + y1 + x2 + y2 + Math.random(); // a good hash
     document.getElementById('shots').appendChild(shotCanvas);
     x1 = percentageHeightToPixel(x1);
     y1 = percentageWidthToPixel(y1);
@@ -177,29 +183,33 @@ socket.on('shotFired', (x1, y1, x2, y2) => {
 
 socket.on('updateLife', (newLife) => {
     document.getElementById('lifeLevel').style.width = newLife + '%';
-    document.getElementById('lifeText').innerHTML = 'Life: ' + newLife;
-    if (newLife >= 100) {
+    if (newLife >= 99) {
+        document.getElementById('lifeText').innerHTML = 'Life: Excellent';
         document.getElementById('lifeLevel').style.backgroundColor = '#7a7a7a';
         redRGBLifeBarColorActivated = false;
     }
     else if (newLife >= 70) {
+        document.getElementById('lifeText').innerHTML = 'Life: High Tier';
         document.getElementById('lifeLevel').style.backgroundColor = '#8f787a';
         redRGBLifeBarColorActivated = false;
     }
     else if (newLife >= 20) {
+        document.getElementById('lifeText').innerHTML = 'Life: Low Tier';
         document.getElementById('lifeLevel').style.backgroundColor = '#8c3a3f';
         redRGBLifeBarColorActivated = false;
     }
     else {
+        document.getElementById('lifeText').innerHTML = 'Life: Dangerously low';
         if (!redRGBLifeBarColorActivated) {
             redRGBLifeBarColorActivated = true;
         }
     }
 });
 
-socket.on('gameFinishedForPlayer', () => {
+socket.on('gameFinishedForPlayer', (win) => {
     socket.emit('game_finished_for_player');
-    setScoreBoard();
+    if (win) document.getElementById('endAnnouncement').innerHTML = "Congrats for your win! (and your tactical skills)";
+    else document.getElementById('endAnnouncement').innerHTML = "Get to the lobby straight away to play more!";
     setState(2);
 });
 
@@ -247,7 +257,30 @@ socket.on('addChatComment', (author, content) => {
     }
 });
 
+socket.on('addImportantComment', (content) => {
+    function remove() {
+        var prevOpacity = document.getElementById('importantComment').style.opacity;
+        function realRemove() {
+            if (prevOpacity != document.getElementById('importantComment').style.opacity) {
+                clearInterval(interval);
+                return;
+            }
+            document.getElementById('importantComment').style.opacity -= 0.01;
+            if (document.getElementById('importantComment').style.opacity <= 0) {
+                document.getElementById('importantComment').innerHTML = "";
+                clearInterval(interval);
+            }
+            prevOpacity = document.getElementById('importantComment').style.opacity;
+        }
+        var interval = setInterval(realRemove, 1);
+    }
+    document.getElementById('importantComment').innerHTML = content;
+    document.getElementById('importantComment').style.opacity = 1;
+    setTimeout(remove, 10000);
+});
+
 function init() {
+    setState(0);
     document.getElementById('game').addEventListener('click', userClicked);
     document.getElementById('startGameButton').onclick = function () { startGameButtonPressed() };
     document.getElementById('chatInput').addEventListener('keyup', function (e) {
@@ -263,4 +296,4 @@ function init() {
     setInterval(keyStatusServerCommunication, 1);
 }
 
-setTimeout(init, 100);
+setTimeout(init, 2);

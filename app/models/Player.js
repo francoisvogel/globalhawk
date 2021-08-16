@@ -10,7 +10,7 @@ class Player {
         this.width = 500;
         this.ratio = 1; // ratio of width = ratio*height
         this.scope = 100000000; // gives the area that can be seen;
-        this.keyPressMove = 100; // move when key w-a-s-d pressed
+        this.keyPressMove = 20*process.env.ACC; // move when key w-a-s-d pressed
         this.exists = true; // defines whether player exists
         this.life = 100; // defines initial life
         this.x;

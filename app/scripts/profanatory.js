@@ -1,4 +1,6 @@
+require("dotenv").config();
 const fs = require('fs');
+const path = require('path');
 
 // returns levenshtein distance between strings a and b
 const levenshteinDistance = (str1 = '', str2 = '') => {
@@ -25,7 +27,7 @@ const levenshteinDistance = (str1 = '', str2 = '') => {
 
 function isProfanatory(text) {
     var words = text.split(/_| |-/);
-    var dictWords = fs.readFileSync(__dirname + '/../database/profanatoryDictionary.txt', 'utf-8').split('\n');
+    var dictWords = fs.readFileSync(path.join(__dirname, '/../../', process.env.DB, 'profanatoryDictionary.txt'), 'utf-8').split('\n');
     var profanatory = false;
     words.forEach(function (i) {
         if (!i.length || i.length >= 20) return;

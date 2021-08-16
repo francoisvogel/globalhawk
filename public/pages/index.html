@@ -2,21 +2,22 @@
 <html>
 
 <head>
-    <!-- <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet"> -->
     <link rel="stylesheet" href="./style/global.css">
+    <link rel="stylesheet" href="./style/scoreBoard.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/scripts/client.js"></script>
 </head>
 
-<body style="margin: 0; user-select: none;">
+<body style="margin: 0;">
     <div id="home">
         <input type="text" id="playerNameInput" placeholder="Enter your name" maxlength="20">
         <button id="startGameButton">Enter matchmaking</button>
     </div>
-    <div id="game">
+    <div id="game" style="user-select: none;">
         <div id="elements" style="z-index: -1"></div>
         <div id="shots" style="z-index: 50"></div>
+        <img id="lightning" src="/images/backgrounds/lightning.svg" style="position: absolute;">
         <div id="ui">
             <div
                 style="z-index: 20; position: absolute; left: 20%; bottom: 20px; width: 60%; height: 15px; background-color: black; border: 2px solid black; border-radius: 100px; opacity: 80%">
@@ -39,12 +40,21 @@
                     <div id="chat"></div>
                 </div>
             </div>
+            <div id="importantComment" style="position: absolute; left: 0%; bottom: 50px; color: yellow; font-size: 30px; text-align: center; width: 100%;"></div>
         </div>
     </div>
     <div id="scoreBoard">
-        <div>
-            <div id="scoreOfAllPlayers"></div>
-            <button id="backToHomeButton">Back to home page</button>
+        <div id="scoreBoardCentralColumn">
+            <div id="endAnnouncement"></div>
+            <a href="./" id="backToHomeButton">Back to landing page</a>
+            <i>Stats with account synchronization, custom matchmaking & spectating, along many other features are coming soon</i>
+            <i>For those wanting to play on their smartphones, an Android version is under development!</i>
+        </div>
+        <div id="scoreBoardRightColumn">
+            <a><img src="./images/icons/instagram.svg" class="socialMediaShare"></a>
+            <a><img src="./images/icons/twitter.svg" class="socialMediaShare"></a>
+            <a><img src="./images/icons/youtube.svg" class="socialMediaShare"></a>
+            <a><img src="./images/icons/facebook.svg" class="socialMediaShare"></a>
         </div>
     </div>
 </body>

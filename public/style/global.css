@@ -5,5 +5,10 @@ html, body, p, div, nav, header, footer, h1, h2, h3, h4, h5, h6, span, input, bu
 }
 
 input {
-    all:unset;
+    all: unset;
+}
+
+a {
+    text-decoration: none;
+    color: yellow;
 }
