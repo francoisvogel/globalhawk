@@ -1,6 +1,6 @@
 const fs = require('fs');
 var gifyParse = require('gify-parse');
-const classicFunctions = require('./server/classicFunctions');
+const geometry = require('./server/geometry');
 const profanatoryDetector = require('./server/profanatory.js');
 const express = require('express');
 const app = express();
@@ -14,8 +14,8 @@ const { type } = require('jquery');
 // const dom = new jsdom.JSDOM("");
 // const jquery = require('jquery')(dom.window);
 
-const totalHeight = 1000000;
-const totalWidth = 1000000;
+const totalHeight = 10000;
+const totalWidth = 10000;
 
 class Background {
     constructor() {
@@ -28,7 +28,7 @@ class Background {
         this.static = true;
     }
     code() {
-        return 'backgrounds/green';
+        return 'backgrounds/green.svg';
     }
 }
 
@@ -53,14 +53,15 @@ class Player {
     }
     // string png to be used locally
     code() {
-        return 'items/drone';
+        return 'items/drone.svg';
     }
     receiveKeyPress(key) {
         console.log('key press received');
+        var xProposed, yProposed;
         switch (key) {
             case 87: // up
-                var xProposed = this.x;
-                var yProposed = this.y;
+                xProposed = this.x;
+                yProposed = this.y;
                 xProposed -= this.keyPressMove;
                 if (0 <= xProposed-this.height/2 && 0 <= yProposed-this.width/2 && xProposed+this.height/2 < totalHeight && yProposed+this.width/2 < totalWidth) {
                     this.x = xProposed;
@@ -68,8 +69,8 @@ class Player {
                 }
                 break;
             case 68: // right
-                var xProposed = this.x;
-                var yProposed = this.y;
+                xProposed = this.x;
+                yProposed = this.y;
                 yProposed += this.keyPressMove;
                 if (0 <= xProposed-this.height/2 && 0 <= yProposed-this.width/2 && xProposed+this.height/2 < totalHeight && yProposed+this.width/2 < totalWidth) {
                     this.x = xProposed;
@@ -77,8 +78,8 @@ class Player {
                 }
                 break;
             case 83: // down
-                var xProposed = this.x;
-                var yProposed = this.y;
+                xProposed = this.x;
+                yProposed = this.y;
                 xProposed += this.keyPressMove;
                 if (0 <= xProposed-this.height/2 && 0 <= yProposed-this.width/2 && xProposed+this.height/2 < totalHeight && yProposed+this.width/2 < totalWidth) {
                     this.x = xProposed;
@@ -86,8 +87,8 @@ class Player {
                 }
                 break;
             case 65: // left
-                var xProposed = this.x;
-                var yProposed = this.y;
+                xProposed = this.x;
+                yProposed = this.y;
                 yProposed -= this.keyPressMove;
                 if (0 <= xProposed-this.height/2 && 0 <= yProposed-this.width/2 && xProposed+this.height/2 < totalHeight && yProposed+this.width/2 < totalWidth) {
                     this.x = xProposed;
@@ -134,12 +135,12 @@ class Match {
                 var fromTop = (this.elements[j].x-(this.players[i].x-actualHeight/2))/actualHeight*100;
                 var fromLeft = (this.elements[j].y-(this.players[i].y-actualWidth/2))/actualWidth*100;
                 // console.log(i.id);
-                io.to(this.players[i].id).emit('addElementToGameView', Number(fromTop), Number(fromLeft), this.elements[j].height/actualHeight*100, this.elements[j].width/actualWidth*100, this.elements[j].code(), this.elements[j].id);
+                io.to(this.players[i].id).emit('addElementToGameView', Number(fromTop), Number(fromLeft), this.elements[j].height*100/actualHeight, this.elements[j].width*100/actualWidth, this.elements[j].code(), this.elements[j].id);
             }
         }
     }
     calculateFreeCoordinates() {
-        return [1000, 1000];
+        return [totalHeight-1000, totalWidth-1000];
     }
     addPlayer(player) {
         this.players.push(player);
@@ -155,14 +156,15 @@ class Match {
         console.log('player removed');
         var x = this.players.indexOf(player);
         if (x == -1) return; // not found
-        for (var i = x; i < this.players.length; i++) this.players[i] = this.players[i+1];
+        for (let i = x; i < this.players.length; i++) this.players[i] = this.players[i+1];
         this.players.pop();
         x = this.elements.indexOf(player);
         if (x == -1) return; // not found, let's say user lost and disconnected at a very short time interval
-        for (var i = x; i < this.elements.length; i++) this.elements[i] = this.elements[i+1];
+        for (let i = x; i < this.elements.length; i++) this.elements[i] = this.elements[i+1];
         this.elements.pop();
         this.activePlayerCount--;
         // io.to(this.matchNumber).emit('removeElementFromGameView', player.id); // not needed any more
+        io.to(this.matchNumber).emit('removeElementFromGameView', player.id);
         io.to(this.matchNumber).emit('updatePlayerCount', this.players.length);
         io.to(this.matchNumber).emit('addChatComment', 'system', player.playerName+' left the match.');
     }
@@ -172,9 +174,9 @@ class Match {
         var selectedElement = -1;
         this.elements.forEach(function(i) {
             // check whether diagonals intersect
-            if (!i.static && i.id != shooter.id && (classicFunctions.lineSegmentIntersect(x1, y1, x2, y2, i.x-i.height/2, i.y-i.width/2, i.x+i.height/2, i.y+i.height/2) || classicFunctions.lineSegmentIntersect(x1, y1, x2, y2, i.x-i.height/2, i.y+i.width/2, i.x+i.height/2, i.y-i.height/2))) {
-                if (classicFunctions.pointDistance(i.x, i.y, x1, y1) < smallestDistance) {
-                    smallestDistance = classicFunctions.pointDistance(i.x, i.y, x1, y1);
+            if (!i.static && i.id != shooter.id && (geometry.lineSegmentIntersect(x1, y1, x2, y2, i.x-i.height/2, i.y-i.width/2, i.x+i.height/2, i.y+i.height/2) || geometry.lineSegmentIntersect(x1, y1, x2, y2, i.x-i.height/2, i.y+i.width/2, i.x+i.height/2, i.y-i.height/2))) {
+                if (geometry.euclideanDistance(i.x, i.y, x1, y1) < smallestDistance) {
+                    smallestDistance = geometry.euclideanDistance(i.x, i.y, x1, y1);
                     selectedElement = i;
                 }
             }
@@ -184,13 +186,25 @@ class Match {
             var actualWidth = actualHeight*i.ratio;
             var fromTopX1 = (x1-(i.x-actualHeight/2))/actualHeight*100;
             var fromLeftY1 = (y1-(i.y-actualWidth/2))/actualWidth*100;
+            var fromTopX2, fromLeftY2;
             if (selectedElement == -1) {
-                var fromTopX2 = (x2-(i.x-actualHeight/2))/actualHeight*100;
-                var fromLeftY2 = (y2-(i.y-actualWidth/2))/actualWidth*100;
+                fromTopX2 = (x2-(i.x-actualHeight/2))/actualHeight*100;
+                fromLeftY2 = (y2-(i.y-actualWidth/2))/actualWidth*100;
             }
             else {
-                var fromTopX2 = (selectedElement.x-(i.x-actualHeight/2))/actualHeight*100;
-                var fromLeftY2 = (selectedElement.y-(i.y-actualWidth/2))/actualWidth*100;
+                var closestIntersection = null;
+                var corners = [[selectedElement.x-selectedElement.height/2, selectedElement.y-selectedElement.width/2], [selectedElement.x-selectedElement.height/2, selectedElement.y+selectedElement.width/2], [selectedElement.x+selectedElement.height/2, selectedElement.y+selectedElement.width/2], [selectedElement.x+selectedElement.height/2, selectedElement.y-selectedElement.width/2]]; // in CCW
+                for (var j = 0; j < 4; j++) {
+                    var secondPoint = (j+1)%4;
+                    if (geometry.lineSegmentIntersect(corners[j][0], corners[j][1], corners[secondPoint][0], corners[secondPoint][1], x1, y1, x2, y2) == true) {
+                        var proposedIntersection = geometry.getLineSegmentIntersection(corners[j][0], corners[j][1], corners[secondPoint][0], corners[secondPoint][1], x1, y1, x2, y2);
+                        if (proposedIntersection != null && (closestIntersection == null || geometry.euclideanDistance(x1, y1, proposedIntersection.intersectX, proposedIntersection.intersectY) < geometry.euclideanDistance(x1, y1, closestIntersection.intersectX, closestIntersection.intersectY))) {
+                            closestIntersection = proposedIntersection;
+                        }
+                    }
+                }
+                fromTopX2 = (closestIntersection.intersectX-(i.x-actualHeight/2))/actualHeight*100;
+                fromLeftY2 = (closestIntersection.intersectY-(i.y-actualWidth/2))/actualWidth*100;
             }
             io.to(i.id).emit('shotFired', fromTopX1, fromLeftY1, fromTopX2, fromLeftY2, 10000);
         });
@@ -212,7 +226,7 @@ function refreshViewAllMatches() {
 }
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/pages/index.html');
+    res.sendFile(path.join(__dirname, '/public/pages/index.html'));
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -256,7 +270,7 @@ io.on('connection', (socket) => {
     socket.on('shot_fired', (xDir, yDir) => {
         // binarySearch the value to find two other points such that the resulting grid is still in bounds
         var k = 0;
-        for (var i = (1<<30); i; i /= 2) {
+        for (var i = (1<<30); i > 0.001; i /= 2) {
             var proposedSecondX = thisPlayer.x+xDir*(k+i);
             var proposedSecondY = thisPlayer.y+yDir*(k+i);
             if (0 <= proposedSecondX && 0 <= proposedSecondY && proposedSecondX < totalHeight && proposedSecondY < totalWidth) {
@@ -271,7 +285,9 @@ io.on('connection', (socket) => {
         if (profanatoryDetector.isProfanatory(message)) {
             io.to(thisPlayer.id).emit('addChatComment', 'system', 'Please remain respectful and polite at all times. Check the Code of Conduct for more details.');
         }
-        io.to(selectedMatch.matchNumber).emit('addChatComment', thisPlayer.playerName, message);
+        else {
+            io.to(selectedMatch.matchNumber).emit('addChatComment', thisPlayer.playerName, message);
+        }
     });
 });
 

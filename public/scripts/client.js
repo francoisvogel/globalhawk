@@ -1,6 +1,5 @@
 var socket = io();
 const generalStatesStyle = 'background-color: white; height: 100%; width: 100%; position:fixed; top: 0;'
-var removedGameChildCount; // number of children that have to be removed
 var state;
 var redRGBLifeBarColor = 230; // global variable for a very particular use in updateLife if life < 20
 var redRGBLifeBarColorDelta = 3; // same thing as redRGBLifeBarColor
@@ -54,8 +53,8 @@ function setState(localState) {
 }
 
 function startGameButtonPressed() {
-    socket.emit('game_start_button_pressed');
     socket.emit('player_name_set', document.getElementById('playerNameInput').value);
+    socket.emit('game_start_button_pressed');
     pressed['W'.charCodeAt(0)] = pressed['A'.charCodeAt(0)] = pressed['S'.charCodeAt(0)] = pressed['D'.charCodeAt(0)] = false;
     setState(1);
 }
@@ -113,11 +112,6 @@ function percentageWidthToPixel(x) {
     return (x * window.innerWidth) / 100;
 }
 
-function chatInput() {
-    if (status != 1) return;
-    var userInput = document.getElementById('userInput');
-}
-
 // adds an element to the game view in terms of percentages
 socket.on('addElementToGameView', (top, left, targetHeight, targetWidth, source, id) => {
     // console.log('E');
@@ -125,7 +119,7 @@ socket.on('addElementToGameView', (top, left, targetHeight, targetWidth, source,
     if (element == null) {
         element = document.createElement('img');
         element.id = id;
-        element.setAttribute('src', '/images/' + source + '.png');
+        element.setAttribute('src', '/images/' + source);
         document.getElementById('elements').appendChild(element);
     }
     var proposedHeight = (targetHeight * window.innerHeight) / 100;
@@ -225,8 +219,20 @@ socket.on('sendUserScreenRatio', () => {
 });
 
 socket.on('addChatComment', (author, content) => {
+    function remove() {
+        var opacity = 1;
+        function realRemove() {
+            opacity -= 0.001;
+            newElement.style.opacity = opacity;
+            if (opacity <= 0) {
+                clearInterval(interval);
+                document.getElementById('chat').removeChild(newElement);
+            }
+        }
+        var interval = setInterval(realRemove, 1);
+    }
     var newElement = document.createElement('div');
-    newElement.style = "margin-top: 5px; font-size: 15px; overflow: hidden;";
+    newElement.style = "margin-top: 5px; font-size: 15px;";
     var boldPart = document.createElement('b');
     boldPart.innerHTML = author + ': ';
     newElement.appendChild(boldPart);
@@ -234,6 +240,10 @@ socket.on('addChatComment', (author, content) => {
     normalPart.innerHTML = content;
     newElement.appendChild(normalPart);
     document.getElementById('chat').insertBefore(newElement, document.getElementById('chat').firstChild);
+    setTimeout(remove, 10000);
+    while (document.getElementById('chat').clientHeight >= 300) {
+        document.getElementById('chat').removeChild(document.getElementById('chat').lastChild);
+    }
 });
 
 document.getElementById('startGameButton').onclick = function () { startGameButtonPressed() };
@@ -250,4 +260,3 @@ onkeydown = onkeyup = keyReact;
 
 setInterval(setLifeBarColor, 10);
 setInterval(keyStatusServerCommunication, 1);
-setInterval(chatInput, 10);
