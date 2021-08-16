@@ -1,7 +1,7 @@
-const fs = require('fs');
-var gifyParse = require('gify-parse');
-const geometry = require('./server/geometry');
-const profanatoryDetector = require('./server/profanatory.js');
+require("dotenv").config();
+// const fs = require('fs');
+const geometry = require('./app/scripts/geometry');
+const profanatoryDetector = require('./app/scripts/profanatory.js');
 const express = require('express');
 const app = express();
 const http = require('http');
@@ -9,106 +9,16 @@ const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server);
 const path = require('path');
-const { type } = require('jquery');
+// const { type } = require('jquery');
 // const jsdom = require('jsdom');
 // const dom = new jsdom.JSDOM("");
 // const jquery = require('jquery')(dom.window);
 
-const totalHeight = 10000;
-const totalWidth = 10000;
+const Background = require('./app/models/Background');
+const Player = require('./app/models/Player');
 
-class Background {
-    constructor() {
-        this.height = totalHeight;
-        this.width = totalWidth;
-        this.exists = true;
-        this.x = totalHeight/2;
-        this.y = totalWidth/2;
-        this.immortal = true;
-        this.static = true;
-    }
-    code() {
-        return 'backgrounds/green.svg';
-    }
-}
-
-class Player {
-    constructor(localID) {
-        this.id = localID;
-        this.height = 500;
-        this.width = 500;
-        this.ratio = 1; // ratio of width = ratio*height
-        this.scope = 100000000; // gives the area that can be seen;
-        this.keyPressMove = 100; // move when key w-a-s-d pressed
-        this.exists = true; // defines whether player exists
-        this.life = 100; // defines initial life
-        this.x;
-        this.y;
-        this.weapon = 0; // originally no weapon is equipped
-        this.playerName = "BuzzDroner"; // default name
-        this.immortal = false;
-        this.removed = false; // indicated whether element has been removed of player view
-        this.destroyedCount = 0; // nb of killed players
-        this.static = false;
-    }
-    // string png to be used locally
-    code() {
-        return 'items/drone.svg';
-    }
-    receiveKeyPress(key) {
-        console.log('key press received');
-        var xProposed, yProposed;
-        switch (key) {
-            case 87: // up
-                xProposed = this.x;
-                yProposed = this.y;
-                xProposed -= this.keyPressMove;
-                if (0 <= xProposed-this.height/2 && 0 <= yProposed-this.width/2 && xProposed+this.height/2 < totalHeight && yProposed+this.width/2 < totalWidth) {
-                    this.x = xProposed;
-                    this.y = yProposed;
-                }
-                break;
-            case 68: // right
-                xProposed = this.x;
-                yProposed = this.y;
-                yProposed += this.keyPressMove;
-                if (0 <= xProposed-this.height/2 && 0 <= yProposed-this.width/2 && xProposed+this.height/2 < totalHeight && yProposed+this.width/2 < totalWidth) {
-                    this.x = xProposed;
-                    this.y = yProposed;
-                }
-                break;
-            case 83: // down
-                xProposed = this.x;
-                yProposed = this.y;
-                xProposed += this.keyPressMove;
-                if (0 <= xProposed-this.height/2 && 0 <= yProposed-this.width/2 && xProposed+this.height/2 < totalHeight && yProposed+this.width/2 < totalWidth) {
-                    this.x = xProposed;
-                    this.y = yProposed;
-                }
-                break;
-            case 65: // left
-                xProposed = this.x;
-                yProposed = this.y;
-                yProposed -= this.keyPressMove;
-                if (0 <= xProposed-this.height/2 && 0 <= yProposed-this.width/2 && xProposed+this.height/2 < totalHeight && yProposed+this.width/2 < totalWidth) {
-                    this.x = xProposed;
-                    this.y = yProposed;
-                }
-                break;
-        }
-        console.log(this.x+' '+this.y);
-    }
-    // returns true if player is killed
-    reduceLife(reducedByValue) {
-        this.life = Math.max(0, this.life-reducedByValue);
-        if (this.life == 0) {
-            io.to(this.id).emit('gameFinishedForPlayer');
-            return true;
-        }
-        console.log('life: '+this.life);
-        return false;
-    }
-}
+const totalHeight = process.env.TOTAL_HEIGHT;
+const totalWidth = process.env.TOTAL_WIDTH;
 
 class Match {
     constructor() {
@@ -209,7 +119,9 @@ class Match {
             io.to(i.id).emit('shotFired', fromTopX1, fromLeftY1, fromTopX2, fromLeftY2, 10000);
         });
         if (selectedElement != -1 && !selectedElement.immortal) {
-            selectedElement.reduceLife(10);
+            if (selectedElement.reduceLife(10)) {
+                io.to(selectedElement.id).emit('gameFinishedForPlayer');
+            }
             if (selectedElement.life == 0 && selectedElement.constructor.name == 'Player') {
                 shooter.destroyedCount++;
                 io.to(shooter.id).emit('updateDestroyedCount', shooter.destroyedCount);
@@ -261,6 +173,7 @@ io.on('connection', (socket) => {
         thisPlayer.exists = false;
         selectedMatch.removePlayer(thisPlayer);
     });
+    // eslint-disable-next-line no-unused-vars
     socket.on('disconnect', (key) => {
         if (thisPlayer != null) {
             thisPlayer.exists = false;
@@ -291,8 +204,8 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(3000, () => {
-    console.log('listening on *:3000');
+server.listen(process.env.PORT, () => {
+    console.log('listening on *:'+process.env.PORT);
 });
 
 setInterval(refreshViewAllMatches, 10);

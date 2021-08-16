@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-undef
 var socket = io();
 const generalStatesStyle = 'background-color: white; height: 100%; width: 100%; position:fixed; top: 0;'
 var state;
@@ -246,17 +247,20 @@ socket.on('addChatComment', (author, content) => {
     }
 });
 
-document.getElementById('startGameButton').onclick = function () { startGameButtonPressed() };
-document.getElementById('game').addEventListener('click', userClicked);
-document.getElementById('chatInput').addEventListener('keyup', function (e) {
-    if (Date.now()-lastInput > 3000 && state == 1 && e.keyCode == 13) {
-        lastInput = Date.now();
-        socket.emit('chat_message_sent', $('#chatInput').val());
-        console.log($('#chatInput').val());
-        $('#chatInput').val("");
-    }
-});
-onkeydown = onkeyup = keyReact;
+function init() {
+    document.getElementById('game').addEventListener('click', userClicked);
+    document.getElementById('startGameButton').onclick = function () { startGameButtonPressed() };
+    document.getElementById('chatInput').addEventListener('keyup', function (e) {
+        if (Date.now()-lastInput > 3000 && state == 1 && e.keyCode == 13) {
+            lastInput = Date.now();
+            socket.emit('chat_message_sent', $('#chatInput').val());
+            console.log($('#chatInput').val());
+            $('#chatInput').val("");
+        }
+    });
+    onkeydown = onkeyup = keyReact;
+    setInterval(setLifeBarColor, 10);
+    setInterval(keyStatusServerCommunication, 1);
+}
 
-setInterval(setLifeBarColor, 10);
-setInterval(keyStatusServerCommunication, 1);
+setTimeout(init, 100);
