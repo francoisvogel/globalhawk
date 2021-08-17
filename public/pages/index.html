@@ -10,11 +10,11 @@
 </head>
 
 <body style="margin: 0;">
-    <div id="home">
+    <div id="home" style="background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
         <input type="text" id="playerNameInput" placeholder="Enter your name" maxlength="20">
         <button id="startGameButton">Enter matchmaking</button>
     </div>
-    <div id="game" style="user-select: none;">
+    <div id="game" style="user-select: none; background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
         <div id="elements" style="z-index: -1"></div>
         <div id="shots" style="z-index: 50"></div>
         <img id="lightning" src="/images/backgrounds/lightning.svg" style="position: absolute;">
@@ -43,10 +43,10 @@
             <div id="importantComment" style="position: absolute; left: 0%; bottom: 50px; color: yellow; font-size: 30px; text-align: center; width: 100%;"></div>
         </div>
     </div>
-    <div id="scoreBoard">
+    <div id="scoreBoard" style="background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
         <div id="scoreBoardCentralColumn">
             <div id="endAnnouncement"></div>
-            <a href="./" id="backToHomeButton">Back to landing page</a>
+            <button id="backToHomeButton" onclick="setState(0);">Back to landing page</button>
             <i>Stats with account synchronization, custom matchmaking & spectating, along many other features are coming soon</i>
             <i>For those wanting to play on their smartphones, an Android version is under development!</i>
         </div>

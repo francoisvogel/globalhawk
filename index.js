@@ -27,29 +27,31 @@ class Match {
         this.elements = [];
         this.elements.push(new Background());
         this.activePlayerCount = 0; // players who are not dead and not disconnected
-        this.lightningRadius = totalHeight; // storm radius
+        this.lightningRadius = 1.5 * Math.sqrt(totalHeight * totalWidth); // storm radius
         this.lightningCenterX = totalHeight / 2;
         this.lightningCenterY = totalWidth / 2;
         this.activeMatch = true;
     }
     updateLightningRadius() {
-        this.lightningRadius -= 10;
-        this.lightningRadius = Math.max(this.lightningRadius, 1);
-        console.log(this.lightningRadius);
+        this.lightningRadius -= 1*process.env.ACC;
+        this.lightningRadius = Math.max(this.lightningRadius, 50);
+        if (this.lightningRadius % 100 == 0) console.log(this.lightningRadius);
         for (let i = 0; i < this.players.length; i++) {
             var actualHeight = Math.sqrt(this.players[i].scope / this.players[i].ratio);
             var actualWidth = actualHeight * this.players[i].ratio;
             var fromTop = (this.lightningCenterX - (this.players[i].x - actualHeight / 2)) / actualHeight * 100;
             var fromLeft = (this.lightningCenterY - (this.players[i].y - actualWidth / 2)) / actualWidth * 100;
             io.to(this.players[i].id).emit('updateLightning', fromTop, fromLeft, this.lightningRadius / Math.sqrt(this.players[i].scope) * 100, this.lightningRadius * 100 / actualHeight, this.lightningRadius * 100 / actualWidth);
-            if (Date.now() % (100 / process.env.ACC) <= 1 /* chance of x/y of being hit */ && geometry.euclideanDistance(this.lightningCenterX, this.lightningCenterY, this.players[i].x, this.players[i].y) >= this.lightningRadius) {
-                if (this.players[i].reduceLife((geometry.euclideanDistance(this.lightningCenterX, this.lightningCenterY, this.players[i].x, this.players[i].y) - this.lightningRadius) / (totalHeight + totalWidth) * 100 * process.env.ACC)) {
-                    io.to(this.players[i].id).emit('addChatComment', 'LightningStorm', this.players[i].playerName + ' is destroyed.');
-                    io.to(this.players[i].id).emit('gameFinishedForPlayer', false);
-                    this.oneRemainingCheck();
-                }
-                else {
-                    io.to(this.players[i].id).emit('addImportantComment', 'Stay away of the lighting storm to avoid being destroyed.');
+            if (Date.now() % 100 <= 20 /* chance of x/y of being hit */) {
+                console.log('check');
+                if (geometry.euclideanDistance(this.lightningCenterX, this.lightningCenterY, this.players[i].x, this.players[i].y) >= this.lightningRadius / 2) {
+                    if (this.players[i].reduceLife((geometry.euclideanDistance(this.lightningCenterX, this.lightningCenterY, this.players[i].x, this.players[i].y) - this.lightningRadius / 2) / (totalHeight + totalWidth) * 20000 * process.env.ACC)) {
+                        io.to(this.players[i].id).emit('addChatComment', 'LightningStorm', this.players[i].playerName + ' is destroyed.');
+                        io.to(this.players[i].id).emit('gameFinishedForPlayer', false);
+                    }
+                    else {
+                        io.to(this.players[i].id).emit('addImportantComment', 'Stay away of the lighting storm to avoid being destroyed.');
+                    }
                 }
             }
         }
@@ -148,7 +150,6 @@ class Match {
         if (selectedElement != -1 && !selectedElement.immortal) {
             if (selectedElement.reduceLife(3 * process.env.ACC)) {
                 io.to(selectedElement.id).emit('gameFinishedForPlayer', false);
-                this.oneRemainingCheck();
             }
             if (selectedElement.life == 0 && selectedElement.constructor.name == 'Player') {
                 shooter.destroyedCount++;
@@ -193,13 +194,10 @@ io.on('connection', (socket) => {
     socket.emit('launchHome');
     var thisPlayer = null;
     var selectedMatch;
-    socket.on('player_name_set', (arg) => {
-        console.log('player_name_set');
+    socket.on('game_start_button_pressed', (arg) => {
         if (arg != "") {
             thisPlayer.playerName = arg;
         }
-    });
-    socket.on('game_start_button_pressed', () => {
         console.log('game_start_button_pressed');
         thisPlayer = new Player(socket.id);
         selectedMatch = matches[matches.length - 1];
@@ -218,6 +216,7 @@ io.on('connection', (socket) => {
         socket.leave(selectedMatch.matchNumber);
         thisPlayer.exists = false;
         selectedMatch.removePlayer(thisPlayer);
+        selectedMatch.oneRemainingCheck();
     });
     // eslint-disable-next-line no-unused-vars
     socket.on('disconnect', (key) => {

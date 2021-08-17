@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 var socket = io();
-const generalStatesStyle = 'background-color: white; height: 100%; width: 100%; position:fixed; top: 0;'
 var state;
 var redRGBLifeBarColor = 230; // global variable for a very particular use in updateLife if life < 20
 var redRGBLifeBarColorDelta = 3; // same thing as redRGBLifeBarColor
@@ -27,31 +26,30 @@ function setState(localState) {
     state = localState;
     switch (state) {
         case 0:
-            document.getElementById('home').style = generalStatesStyle + ' visibility: visible;';
-            document.getElementById('game').style = generalStatesStyle + ' visibility: hidden;';
-            document.getElementById('scoreBoard').style = generalStatesStyle + ' visibility: hidden;';
+            document.getElementById('home').style.visibility = 'visible';
+            document.getElementById('game').style.visibility = 'hidden';
+            document.getElementById('scoreBoard').style.visibility = 'hidden';
             break;
         case 1:
             document.getElementById('chatInput').value = "";
             document.getElementById('shots').innerHTML = "";
             document.getElementById('elements').innerHTML = "";
             document.getElementById('chat').innerHTML = "";
-            document.getElementById('home').style = generalStatesStyle + ' visibility: hidden;';
-            document.getElementById('game').style = generalStatesStyle + ' visibility: visible;';
-            document.getElementById('scoreBoard').style = generalStatesStyle + ' visibility: hidden;';
+            document.getElementById('home').style.visibility = 'hidden';
+            document.getElementById('game').style.visibility = 'visible';
+            document.getElementById('scoreBoard').style.visibility = 'hidden';
             break;
         case 2:
-            document.getElementById('home').style = generalStatesStyle + ' visibility: hidden;';
-            document.getElementById('game').style = generalStatesStyle + ' visibility: hidden;';
-            document.getElementById('scoreBoard').style = generalStatesStyle + ' visibility: visible;';
+            document.getElementById('home').style.visibility = 'hidden';
+            document.getElementById('game').style.visibility = 'hidden';
+            document.getElementById('scoreBoard').style.visibility = 'visible';
             break;
     }
     console.log('state set to ' + state);
 }
 
 function startGameButtonPressed() {
-    socket.emit('player_name_set', document.getElementById('playerNameInput').value);
-    socket.emit('game_start_button_pressed');
+    socket.emit('game_start_button_pressed', document.getElementById('playerNameInput').value);
     pressed['W'.charCodeAt(0)] = pressed['A'.charCodeAt(0)] = pressed['S'.charCodeAt(0)] = pressed['D'.charCodeAt(0)] = false;
     setState(1);
 }
@@ -135,8 +133,8 @@ socket.on('removeElementFromGameView', (id) => {
 });
 
 socket.on('updateLightning', (x, y, radius, targetHeight, targetWidth) => {
-    targetHeight *= 10000;
-    targetWidth *= 10000;
+    targetHeight *= 100;
+    targetWidth *= 100;
     var imageHeight = (targetHeight * window.innerHeight) / 100;
     var imageWidth = (targetWidth * window.innerWidth) / 100;
     x -= targetHeight / 2;
