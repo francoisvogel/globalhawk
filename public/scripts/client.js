@@ -134,14 +134,17 @@ socket.on('removeElementFromGameView', (id) => {
     if (toRemove != undefined) document.getElementById('elements').removeChild(toRemove);
 });
 
-socket.on('updateLightning', (x, y, radius) => { // all given in percent
-    var actualRadius = radius*100;
-    x -= actualRadius/2;
-    y -= actualRadius/2;
-    document.getElementById('lightning').style.top = x+'%';
-    document.getElementById('lightning').style.left = y+'%';
-    document.getElementById('lightning').style.height = actualRadius+'%';
-    document.getElementById('lightning').style.width = actualRadius+'%';
+socket.on('updateLightning', (x, y, radius, targetHeight, targetWidth) => {
+    targetHeight *= 10000;
+    targetWidth *= 10000;
+    var imageHeight = (targetHeight * window.innerHeight) / 100;
+    var imageWidth = (targetWidth * window.innerWidth) / 100;
+    x -= targetHeight / 2;
+    y -= targetWidth / 2;
+    document.getElementById('lightning').style.top = x + '%';
+    document.getElementById('lightning').style.left = y + '%';
+    document.getElementById('lightning').style.height = imageHeight + 'px';
+    document.getElementById('lightning').style.width = imageWidth + 'px';
 });
 
 socket.on('shotFired', (x1, y1, x2, y2) => {
@@ -284,7 +287,7 @@ function init() {
     document.getElementById('game').addEventListener('click', userClicked);
     document.getElementById('startGameButton').onclick = function () { startGameButtonPressed() };
     document.getElementById('chatInput').addEventListener('keyup', function (e) {
-        if (Date.now()-lastInput > 3000 && state == 1 && e.keyCode == 13) {
+        if (Date.now() - lastInput > 3000 && state == 1 && e.keyCode == 13) {
             lastInput = Date.now();
             socket.emit('chat_message_sent', $('#chatInput').val());
             console.log($('#chatInput').val());

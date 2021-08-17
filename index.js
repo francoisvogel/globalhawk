@@ -41,9 +41,9 @@ class Match {
             var actualWidth = actualHeight * this.players[i].ratio;
             var fromTop = (this.lightningCenterX - (this.players[i].x - actualHeight / 2)) / actualHeight * 100;
             var fromLeft = (this.lightningCenterY - (this.players[i].y - actualWidth / 2)) / actualWidth * 100;
-            io.to(this.players[i].id).emit('updateLightning', fromTop, fromLeft, this.lightningRadius / Math.sqrt(this.players[i].scope) * 100);
+            io.to(this.players[i].id).emit('updateLightning', fromTop, fromLeft, this.lightningRadius / Math.sqrt(this.players[i].scope) * 100, this.lightningRadius * 100 / actualHeight, this.lightningRadius * 100 / actualWidth);
             if (Date.now() % (100 / process.env.ACC) <= 1 /* chance of x/y of being hit */ && geometry.euclideanDistance(this.lightningCenterX, this.lightningCenterY, this.players[i].x, this.players[i].y) >= this.lightningRadius) {
-                if (this.players[i].reduceLife((geometry.euclideanDistance(this.lightningCenterX, this.lightningCenterY, this.players[i].x, this.players[i].y) - this.lightningRadius) / (totalHeight + totalWidth) * process.env.ACC)) {
+                if (this.players[i].reduceLife((geometry.euclideanDistance(this.lightningCenterX, this.lightningCenterY, this.players[i].x, this.players[i].y) - this.lightningRadius) / (totalHeight + totalWidth) * 100 * process.env.ACC)) {
                     io.to(this.players[i].id).emit('addChatComment', 'LightningStorm', this.players[i].playerName + ' is destroyed.');
                     io.to(this.players[i].id).emit('gameFinishedForPlayer', false);
                     this.oneRemainingCheck();
