@@ -4,70 +4,63 @@ const totalHeight = process.env.TOTAL_HEIGHT;
 const totalWidth = process.env.TOTAL_WIDTH;
 
 class Player {
-    constructor(localID) {
+    constructor(localID, localMatch) {
         this.id = localID;
+        this.match = localMatch;
         this.height = 500;
         this.width = 500;
         this.ratio = 1; // ratio of width = ratio*height
         this.scope = 100000000; // gives the area that can be seen;
-        this.keyPressMove = 20*process.env.ACC; // move when key w-a-s-d pressed
+        this.keyPressMove = 10*process.env.ACC; // move when key w-a-s-d pressed
         this.exists = true; // defines whether player exists
         this.life = 100; // defines initial life
         this.x;
         this.y;
+        this.shape = 'rect';
         this.weapon = 0; // originally no weapon is equipped
         this.playerName = "BuzzDroner"; // default name
         this.immortal = false;
         this.removed = false; // indicated whether element has been removed of player view
         this.destroyedCount = 0; // nb of killed players
         this.static = false;
+        this.boostCountdown = 0; // used to store time since last boost
+        this.boostCountdownReset = 5000; // boost reset value
+        this.obstacle = true;
+        this.hitMoveTime = 300; // how many ms it lasts
+        this.tickHitMove = 10; // move per ms when hit
+        this.frozen = false;
     }
-    // string png to be used locally
+    // string png to be used on client
     code() {
         return 'items/drone.svg';
     }
-    receiveKeyPress(key) {
-        console.log('key press received');
-        var xProposed, yProposed;
-        switch (key) {
-            case 87: // up
-                xProposed = this.x;
-                yProposed = this.y;
-                xProposed -= this.keyPressMove;
-                if (0 <= xProposed-this.height/2 && 0 <= yProposed-this.width/2 && xProposed+this.height/2 < totalHeight && yProposed+this.width/2 < totalWidth) {
-                    this.x = xProposed;
-                    this.y = yProposed;
-                }
-                break;
-            case 68: // right
-                xProposed = this.x;
-                yProposed = this.y;
-                yProposed += this.keyPressMove;
-                if (0 <= xProposed-this.height/2 && 0 <= yProposed-this.width/2 && xProposed+this.height/2 < totalHeight && yProposed+this.width/2 < totalWidth) {
-                    this.x = xProposed;
-                    this.y = yProposed;
-                }
-                break;
-            case 83: // down
-                xProposed = this.x;
-                yProposed = this.y;
-                xProposed += this.keyPressMove;
-                if (0 <= xProposed-this.height/2 && 0 <= yProposed-this.width/2 && xProposed+this.height/2 < totalHeight && yProposed+this.width/2 < totalWidth) {
-                    this.x = xProposed;
-                    this.y = yProposed;
-                }
-                break;
-            case 65: // left
-                xProposed = this.x;
-                yProposed = this.y;
-                yProposed -= this.keyPressMove;
-                if (0 <= xProposed-this.height/2 && 0 <= yProposed-this.width/2 && xProposed+this.height/2 < totalHeight && yProposed+this.width/2 < totalWidth) {
-                    this.x = xProposed;
-                    this.y = yProposed;
-                }
-                break;
+    computeRealBoost(x) {
+        x = (x-0.5)/0.5;
+        if (x < 0) x = 0;
+        return 4*x*x;
+    }
+    playerMove(xShift, yShift, boostActivated) {
+        if (this.boostCountdown > 0) boostActivated = false;
+        if (boostActivated == true) {
+            this.boostCountdown = this.boostCountdownReset;
         }
-        console.log(this.x+' '+this.y);
+        var xProposed, yProposed;
+        xProposed = this.x;
+        yProposed = this.y;
+        xProposed += xShift*this.keyPressMove*(1+this.computeRealBoost(this.boostCountdown/this.boostCountdownReset));
+        yProposed += yShift*this.keyPressMove*(1+this.computeRealBoost(this.boostCountdown/this.boostCountdownReset));
+        if (0 <= xProposed-this.height/2 && 0 <= yProposed-this.width/2 && xProposed+this.height/2 < totalHeight && yProposed+this.width/2 < totalWidth) {
+            return {
+                x: xProposed,
+                y: yProposed
+            }
+        }
+    }
+    // called regularly from match refresh function
+    refresh() {
+        this.boostCountdown -= process.env.REFRESH;
+        this.boostCountdown = Math.max(0, this.boostCountdown);
+        return this.computeRealBoost(this.boostCountdown/this.boostCountdownReset)/this.computeRealBoost(1);
     }
     // returns true if player is killed
     reduceLife(reducedByValue) {
@@ -75,8 +68,11 @@ class Player {
         if (this.life == 0) {
             return true;
         }
-        console.log('life: '+this.life);
+        // console.log('life: '+this.life);
         return false;
+    }
+    augmentLife(x) {
+        return this.reduceLife(-Math.min(x, 100-this.life));
     }
 }
 

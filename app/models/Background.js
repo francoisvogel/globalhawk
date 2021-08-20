@@ -12,6 +12,10 @@ class Background {
         this.y = totalWidth/2;
         this.immortal = true;
         this.static = true;
+        this.shape = 'rect';
+        this.id = 0; // doesn't really need an id because it only occurs once in a match
+        this.background = true;
+        this.obstacle = false;
     }
     code() {
         return 'backgrounds/green.svg';

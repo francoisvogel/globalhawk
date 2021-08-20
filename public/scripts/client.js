@@ -8,8 +8,7 @@ var pressed = {}; // remembers whether which keys are pressed
 var lastInput = 0;
 
 function setLifeBarColor() {
-    if (!redRGBLifeBarColorActivated) return;
-    console.log('called');
+    if (state != 1 || !redRGBLifeBarColorActivated) return;
     redRGBLifeBarColor += redRGBLifeBarColorDelta;
     if (redRGBLifeBarColor >= 255) {
         redRGBLifeBarColor = 255;
@@ -50,37 +49,47 @@ function setState(localState) {
 
 function startGameButtonPressed() {
     socket.emit('game_start_button_pressed', document.getElementById('playerNameInput').value);
-    pressed['W'.charCodeAt(0)] = pressed['A'.charCodeAt(0)] = pressed['S'.charCodeAt(0)] = pressed['D'.charCodeAt(0)] = false;
+    pressed['W'.charCodeAt(0)] = pressed['A'.charCodeAt(0)] = pressed['S'.charCodeAt(0)] = pressed['D'.charCodeAt(0)] = pressed[-1] = false;
     setState(1);
 }
 
 function keyReact(e) {
     if (state != 1) return;
+    // console.log('keyReact');
     if (e.type == 'keydown') {
-        console.log(e.keyCode);
+        // console.log(e.keyCode);
         pressed[e.keyCode] = true;
+        if (e.shiftKey) {
+            pressed[-1] = true;
+        }
     }
     else {
-        console.log(e.keyCode);
+        // console.log(e.keyCode);
         pressed[e.keyCode] = false;
+        pressed[-1] = false;
     }
 }
 
 function keyStatusServerCommunication() {
     var chatInput = document.getElementById('chatInput');
     if (state != 1 || document.activeElement == chatInput) return;
+    var boostActivated = false;
+    if (pressed[-1]) boostActivated = true;
+    var xShift = 0;
+    var yShift = 0;
     if (pressed['W'.charCodeAt(0)]) {
-        socket.emit('key_pressed', 'W'.charCodeAt(0));
+        xShift -= 1;
     }
     if (pressed['A'.charCodeAt(0)]) {
-        socket.emit('key_pressed', 'A'.charCodeAt(0));
+        yShift -= 1;
     }
     if (pressed['S'.charCodeAt(0)]) {
-        socket.emit('key_pressed', 'S'.charCodeAt(0));
+        xShift += 1;
     }
     if (pressed['D'.charCodeAt(0)]) {
-        socket.emit('key_pressed', 'D'.charCodeAt(0));
+        yShift += 1;
     }
+    socket.emit('player_move', xShift, yShift, boostActivated);
 }
 
 function userClicked() {
@@ -145,6 +154,24 @@ socket.on('updateLightning', (x, y, radius, targetHeight, targetWidth) => {
     document.getElementById('lightning').style.width = imageWidth + 'px';
 });
 
+socket.on('updateBoostBar', (percentage) => {
+    percentage = Math.min(100, percentage * 1.3);
+    document.getElementById('boostLevel').style.width = percentage + '%';
+    document.getElementById('boostText').innerHTML = 'Boost (<i>Shift</i>)';
+    if (percentage >= 90) {
+        document.getElementById('boostLevel').style.backgroundColor = 'red';
+    }
+    else if (percentage >= 70) {
+        document.getElementById('boostLevel').style.backgroundColor = 'orange';
+    }
+    else if (percentage >= 30) {
+        document.getElementById('boostLevel').style.backgroundColor = 'yellow';
+    }
+    else {
+        document.getElementById('boostLevel').style.backgroundColor = 'green';
+    }
+});
+
 socket.on('shotFired', (x1, y1, x2, y2) => {
     var shotCanvas = document.createElement('canvas');
     shotCanvas.style.zIndex = 10;
@@ -175,7 +202,7 @@ socket.on('shotFired', (x1, y1, x2, y2) => {
         line.beginPath();
         line.moveTo(y1, x1);
         line.lineTo(y2, x2);
-        line.lineWidth = 2;
+        line.lineWidth = 3.5;
         line.globalAlpha = alpha;
         line.strokeStyle = '#ff0000';
         line.stroke();
@@ -230,6 +257,37 @@ socket.on('sendUserScreenRatio', () => {
     socket.emit('user_screen_ratio', window.innerWidth / window.innerHeight);
 });
 
+// time of fadeIn+fadeOut = 1s
+socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) => {
+    function dynamicDisplay() {
+        elapsedTime++;
+        var fadeDegree = elapsedTime;
+        if (elapsedTime >= 50) {
+            document.getElementById('imageEvents').removeChild(newElement);
+            clearInterval(interval);
+        }
+        else if (elapsedTime >= 25) {
+            fadeDegree = 50 - elapsedTime;
+        }
+        newElement.style.opacity = fadeDegree / 25;
+    }
+    var newElement = document.createElement('img');
+    newElement.setAttribute('src', 'images/events/' + source);
+    newElement.id = id;
+    document.getElementById('elements').appendChild(newElement);
+    var proposedHeight = (targetHeight * window.innerHeight) / 100;
+    var proposedWidth = (targetWidth * window.innerWidth) / 100;
+    newElement.setAttribute('height', proposedHeight);
+    newElement.setAttribute('width', proposedWidth);
+    var topOffset = top - targetHeight / 2;
+    var leftOffset = left - targetWidth / 2;
+    var styleAssign = /*'background-size: cover; box-shadow: 0px 10px 20px -5px rgba(0,0,0,.8); background: linear-gradient(#004092, #020202, transparent), url(\'images/'+source+'\') no-repeat center;*/' z-index: -1; object-fit: fill; position: absolute; top: ' + topOffset + '%; left: ' + leftOffset + '%;';
+    newElement.style = styleAssign;
+    document.getElementById('imageEvents').appendChild(newElement);
+    var elapsedTime = 0;
+    var interval = setInterval(dynamicDisplay, 1);
+});
+
 socket.on('addChatComment', (author, content) => {
     function remove() {
         var opacity = 1;
@@ -258,23 +316,22 @@ socket.on('addChatComment', (author, content) => {
     }
 });
 
+var importantCommentLastContent;
+var importantCommentLastSetAt = 0;
 socket.on('addImportantComment', (content) => {
     function remove() {
-        var prevOpacity = document.getElementById('importantComment').style.opacity;
         function realRemove() {
-            if (prevOpacity != document.getElementById('importantComment').style.opacity) {
-                clearInterval(interval);
-                return;
-            }
             document.getElementById('importantComment').style.opacity -= 0.01;
             if (document.getElementById('importantComment').style.opacity <= 0) {
                 document.getElementById('importantComment').innerHTML = "";
                 clearInterval(interval);
             }
-            prevOpacity = document.getElementById('importantComment').style.opacity;
         }
         var interval = setInterval(realRemove, 1);
     }
+    if (Date.now() - importantCommentLastSetAt <= 2000 || content == importantCommentLastContent) return;
+    importantCommentLastSetAt = Date.now();
+    importantCommentLastContent = content;
     document.getElementById('importantComment').innerHTML = content;
     document.getElementById('importantComment').style.opacity = 1;
     setTimeout(remove, 10000);
@@ -294,7 +351,11 @@ function init() {
     });
     onkeydown = onkeyup = keyReact;
     setInterval(setLifeBarColor, 10);
-    setInterval(keyStatusServerCommunication, 1);
+    setInterval(keyStatusServerCommunication, 30);
+    // eslint-disable-next-line no-unused-vars
+    $("body").on("contextmenu", function (e) {
+        return false;
+    });
 }
 
 setTimeout(init, 2);
