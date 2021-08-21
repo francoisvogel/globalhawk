@@ -80,7 +80,7 @@ class Match {
         }
     }
     updateLightningRadius() {
-        this.lightningRadius -= 50 / process.env.REFRESH * process.env.ACC;
+        this.lightningRadius -= 1 / process.env.REFRESH * process.env.ACC;
         this.lightningRadius = Math.max(this.lightningRadius, 200);
         // if (this.lightningRadius % 100 == 0) console.log(this.lightningRadius);
         for (let i = 0; i < this.players.length; i++) {
@@ -411,6 +411,13 @@ io.on('connection', (socket) => {
             io.to(selectedMatch.matchNumber).emit('addChatComment', thisPlayer.playerName, message);
         }
     });
+    socket.on('voice_message', (data) => {
+        if (!sanityCheck()) return;
+        var newData = data.split(';');
+        newData[0] = "data:audio/ogg;";
+        newData = newData[0]+newData[1];
+        socket.to(selectedMatch.matchNumber).emit('voiceMessage', newData);
+    })
 });
 
 server.listen(process.env.PORT, () => {

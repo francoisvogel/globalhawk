@@ -9,12 +9,13 @@
     <script src="/scripts/client.js"></script>
 </head>
 
-<body style="margin: 0;">
+<body id="body" style="margin: 0;">
     <div id="home" style="background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
         <input type="text" id="playerNameInput" placeholder="Enter your name" maxlength="20">
         <button id="startGameButton">Enter matchmaking</button>
     </div>
     <div id="game" style="user-select: none; background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
+        <audio id="audio"></audio>
         <div style="cursor: crosshair;">
             <div id="elements" style="z-index: -1"></div>
             <div id="shots" style="z-index: 50"></div>

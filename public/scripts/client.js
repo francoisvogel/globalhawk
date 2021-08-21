@@ -6,6 +6,10 @@ var redRGBLifeBarColorDelta = 3; // same thing as redRGBLifeBarColor
 var redRGBLifeBarColorActivated = false; // same thing as just above
 var pressed = {}; // remembers whether which keys are pressed
 var lastInput = 0;
+var callStatus = {
+    microphoneActivated: true,
+    speakerActivated: true
+};
 
 function setLifeBarColor() {
     if (state != 1 || !redRGBLifeBarColorActivated) return;
@@ -51,6 +55,7 @@ function startGameButtonPressed() {
     socket.emit('game_start_button_pressed', document.getElementById('playerNameInput').value);
     pressed['W'.charCodeAt(0)] = pressed['A'.charCodeAt(0)] = pressed['S'.charCodeAt(0)] = pressed['D'.charCodeAt(0)] = pressed[-1] = false;
     setState(1);
+    record();
 }
 
 function keyReact(e) {
@@ -114,6 +119,41 @@ function percentageHeightToPixel(x) {
 
 function percentageWidthToPixel(x) {
     return (x * window.innerWidth) / 100;
+}
+
+const updateRecordTime = 1000;
+function record() {
+    if (state != 1) return;
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+        if (state != 1) return;
+        var mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+        var audioChunks = [];
+        mediaRecorder.addEventListener("dataavailable", function (event) {
+            if (state != 1) return;
+            audioChunks.push(event.data);
+        });
+        mediaRecorder.addEventListener("stop", function () {
+            if (state != 1) return;
+            var audioBlob = new Blob(audioChunks);
+            audioChunks = [];
+            var fileReader = new FileReader();
+            fileReader.readAsDataURL(audioBlob);
+            fileReader.onloadend = function () {
+                if (!callStatus.microphoneActivated) return;
+                var base64String = fileReader.result;
+                socket.emit("voice_message", base64String);
+            };
+            mediaRecorder.start();
+            setTimeout(function () {
+                mediaRecorder.stop();
+            }, updateRecordTime);
+        });
+
+        setTimeout(function () {
+            mediaRecorder.stop();
+        }, updateRecordTime);
+    });
 }
 
 // adds an element to the game view in terms of percentages
@@ -335,6 +375,25 @@ socket.on('addImportantComment', (content) => {
     document.getElementById('importantComment').innerHTML = content;
     document.getElementById('importantComment').style.opacity = 1;
     setTimeout(remove, 10000);
+});
+
+socket.on('voiceMessage', (data) => {
+    // var sound = document.createElement('source');
+    // sound.src = data;
+    // sound.type = "audio/ogg";
+    // document.getElementById('audio').appendChild(sound);
+    // var playPromise = document.getElementById('audio').play();
+    // if (playPromise !== undefined) {
+    //     playPromise.then(function () {
+    //         // Automatic playback started!
+    //     }).catch(function (error) {
+    //         // Automatic playback failed.
+    //         // Show a UI element to let the user manually start playback.
+    //         console.log(error);
+    //     });
+    // }
+    var audio = new Audio(data);
+    audio.play();
 });
 
 function init() {
