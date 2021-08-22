@@ -1,0 +1,32 @@
+#lobby {
+    color: yellow;
+    height: 100%;
+    background: rgb(25,169,146);
+    background: radial-gradient(circle, rgba(25,169,146,1) 0%, rgba(37,112,8,1) 100%);
+}
+
+#playerNameInput {
+    text-align: center;
+    transition: 1s;
+    border: 5px double turquoise;
+    border-radius: 20px;
+    padding: 10px;
+    font-size: 20px;
+    background: linear-gradient(90deg, rgba(133,149,46,1) 0%, rgba(62,136,42,1) 50%, rgba(20,142,157,1) 100%);
+}
+
+#startGameButton {
+    text-align: center;
+    transition: 1s;
+    border: 5px double turquoise;
+    border-radius: 20px;
+    padding: 10px;
+    font-size: 20px;
+    background: linear-gradient(90deg, rgba(133,149,46,1) 0%, rgba(62,136,42,1) 50%, rgba(20,142,157,1) 100%);
+}
+
+#startGameButton:hover {
+    color: yellowgreen;
+    transform: scale(1.1) skew(10deg, 5deg);
+    cursor: pointer;
+}

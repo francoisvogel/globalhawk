@@ -4,24 +4,27 @@
 <head>
     <link rel="stylesheet" href="./style/global.css">
     <link rel="stylesheet" href="./style/scoreBoard.css">
+    <link rel="stylesheet" href="./style/lobby.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/scripts/client.js"></script>
 </head>
 
 <body id="body" style="margin: 0;">
-    <div id="home" style="background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
-        <input type="text" id="playerNameInput" placeholder="Enter your name" maxlength="20">
-        <button id="startGameButton">Enter matchmaking</button>
+    <div id="lobby" style="background-color: white; height: 100%; width: 100%; position: fixed; top: 0;">
+        <div style="position: absolute; display: flex; top: 40%; height: 20%; width: 100%; flex-direction: column; justify-content: space-around; align-items: center;">
+            <input type="text" id="playerNameInput" class="yellowPlaceholder" placeholder="Enter your nickname" maxlength="15">
+            <button type="button" id="startGameButton">Enter matchmaking</button>
+        </div>
     </div>
-    <div id="game" style="user-select: none; background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
-        <audio id="audio"></audio>
+    <div id="game"
+        style="user-select: none; background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
         <div style="cursor: crosshair;">
             <div id="elements" style="z-index: -1"></div>
             <div id="shots" style="z-index: 50"></div>
             <img id="lightning" src="/images/backgrounds/lightning.svg" style="position: absolute;">
             <div id="imageEvents"></div>
-        <div>
+        </div>
         <div id="ui">
             <div
                 style="z-index: 20; position: absolute; left: 20%; bottom: 20px; width: 60%; height: 15px; background-color: black; border: 2px solid black; border-radius: 100px; opacity: 80%">
@@ -32,6 +35,12 @@
                 style="z-index: 20; position: absolute; left: 20%; bottom: 50px; width: 60%; height: 15px; background-color: black; border: 2px solid black; border-radius: 100px; opacity: 80%">
                 <p id="boostText" style="position: absolute; top: 0; color:white; left: 8px; font-size: 13px;"></p>
                 <div id="boostLevel" style="height: 100%; border-radius: 100px;"></div>
+            </div>
+            <div
+                style="opacity: 60%; background-color: gainsboro; padding: 5px; border-radius: 5px; width: 70px; height: 150px; position: absolute; top: 1%; left: 1%; display: flex; flex-direction: column; justify-content: space-around; align-items: center;">
+                <p style="font-size: small;">Voice Chat</p>
+                <button id="microphoneActivation" type="button"><img id="microphoneActivationImage" src="./images/icons/microphone_off.svg" style="height: 50px; width: 50px;"></button>
+                <button id="speakerActivation" type="button"><img id="speakerActivationImage" src="./images/icons/speaker_on.svg" style="height: 50px; width: 50px;"></button>
             </div>
             <div style="opacity: 80%; width: 300px; overflow: hidden; position: absolute; top: 1%; right: 1%;">
                 <div style="text-align: center; display: flex; flex-direction: row; justify-content: space-around;">
@@ -45,18 +54,22 @@
                     </div>
                 </div>
                 <div style="margin-top: 10px;">
-                    <input type="text" id="chatInput" placeholder="Enter a message" maxlength="100" style="width: 100%; color: yellow;" class="yellowPlaceholder">
+                    <input type="text" id="chatInput" placeholder="Enter a message" maxlength="100"
+                        style="width: 100%; color: yellow;" class="yellowPlaceholder">
                     <div id="chat"></div>
                 </div>
             </div>
-            <div id="importantComment" style="position: absolute; left: 0%; bottom: 90px; color: yellow; font-size: 30px; text-align: center; width: 100%;"></div>
+            <div id="importantComment"
+                style="position: absolute; left: 0%; bottom: 90px; color: yellow; font-size: 30px; text-align: center; width: 100%;">
+            </div>
         </div>
     </div>
     <div id="scoreBoard" style="background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
         <div id="scoreBoardCentralColumn">
             <div id="endAnnouncement"></div>
             <button id="backToHomeButton" onclick="setState(0);">Back to lobby</button>
-            <i>Stats with account synchronization, custom matchmaking & spectating, along many other features are coming soon</i>
+            <i>Stats with account synchronization, custom matchmaking & spectating, along many other features are coming
+                soon</i>
             <i>For those wanting to play on their smartphones, an Android version is under development!</i>
         </div>
         <div id="scoreBoardRightColumn">

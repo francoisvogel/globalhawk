@@ -6,8 +6,8 @@ var redRGBLifeBarColorDelta = 3; // same thing as redRGBLifeBarColor
 var redRGBLifeBarColorActivated = false; // same thing as just above
 var pressed = {}; // remembers whether which keys are pressed
 var lastInput = 0;
-var callStatus = {
-    microphoneActivated: true,
+var callStatus = { // initialization state, then kept over games
+    microphoneActivated: false,
     speakerActivated: true
 };
 
@@ -25,11 +25,16 @@ function setLifeBarColor() {
     document.getElementById('lifeLevel').style.backgroundColor = 'rgb(' + redRGBLifeBarColor + ', 0, 0)';
 }
 
+function beep() {
+    var audio = new Audio('audio/events/beep.mp3');
+    audio.play();
+}
+
 function setState(localState) {
     state = localState;
     switch (state) {
         case 0:
-            document.getElementById('home').style.visibility = 'visible';
+            document.getElementById('lobby').style.visibility = 'visible';
             document.getElementById('game').style.visibility = 'hidden';
             document.getElementById('scoreBoard').style.visibility = 'hidden';
             break;
@@ -38,12 +43,12 @@ function setState(localState) {
             document.getElementById('shots').innerHTML = "";
             document.getElementById('elements').innerHTML = "";
             document.getElementById('chat').innerHTML = "";
-            document.getElementById('home').style.visibility = 'hidden';
+            document.getElementById('lobby').style.visibility = 'hidden';
             document.getElementById('game').style.visibility = 'visible';
             document.getElementById('scoreBoard').style.visibility = 'hidden';
             break;
         case 2:
-            document.getElementById('home').style.visibility = 'hidden';
+            document.getElementById('lobby').style.visibility = 'hidden';
             document.getElementById('game').style.visibility = 'hidden';
             document.getElementById('scoreBoard').style.visibility = 'visible';
             break;
@@ -121,20 +126,22 @@ function percentageWidthToPixel(x) {
     return (x * window.innerWidth) / 100;
 }
 
-const updateRecordTime = 1000;
+const updateRecordTime = 500;
 function record() {
-    if (state != 1) return;
+    function stopRecord() {
+        return (state != 1 || !callStatus.microphoneActivated);
+    }
     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-        if (state != 1) return;
+        if (stopRecord()) return;
         var mediaRecorder = new MediaRecorder(stream);
         mediaRecorder.start();
         var audioChunks = [];
         mediaRecorder.addEventListener("dataavailable", function (event) {
-            if (state != 1) return;
+            if (stopRecord()) return;
             audioChunks.push(event.data);
         });
         mediaRecorder.addEventListener("stop", function () {
-            if (state != 1) return;
+            if (stopRecord()) return;
             var audioBlob = new Blob(audioChunks);
             audioChunks = [];
             var fileReader = new FileReader();
@@ -297,7 +304,6 @@ socket.on('sendUserScreenRatio', () => {
     socket.emit('user_screen_ratio', window.innerWidth / window.innerHeight);
 });
 
-// time of fadeIn+fadeOut = 1s
 socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) => {
     function dynamicDisplay() {
         elapsedTime++;
@@ -372,26 +378,13 @@ socket.on('addImportantComment', (content) => {
     if (Date.now() - importantCommentLastSetAt <= 2000 || content == importantCommentLastContent) return;
     importantCommentLastSetAt = Date.now();
     importantCommentLastContent = content;
+    beep();
     document.getElementById('importantComment').innerHTML = content;
     document.getElementById('importantComment').style.opacity = 1;
     setTimeout(remove, 10000);
 });
 
 socket.on('voiceMessage', (data) => {
-    // var sound = document.createElement('source');
-    // sound.src = data;
-    // sound.type = "audio/ogg";
-    // document.getElementById('audio').appendChild(sound);
-    // var playPromise = document.getElementById('audio').play();
-    // if (playPromise !== undefined) {
-    //     playPromise.then(function () {
-    //         // Automatic playback started!
-    //     }).catch(function (error) {
-    //         // Automatic playback failed.
-    //         // Show a UI element to let the user manually start playback.
-    //         console.log(error);
-    //     });
-    // }
     var audio = new Audio(data);
     audio.play();
 });
@@ -408,6 +401,23 @@ function init() {
             $('#chatInput').val("");
         }
     });
+    document.getElementById('microphoneActivation').addEventListener('click', () => {
+        beep();
+        callStatus.microphoneActivated = !callStatus.microphoneActivated;
+        if (callStatus.microphoneActivated) document.getElementById('microphoneActivationImage').src = 'images/icons/microphone_on.svg';
+        else document.getElementById('microphoneActivationImage').src = 'images/icons/microphone_off.svg';
+        if (callStatus.microphoneActivated) record();
+    });
+    document.getElementById('speakerActivation').addEventListener('click', () => {
+        beep();
+        callStatus.speakerActivated = !callStatus.speakerActivated;
+        if (callStatus.speakerActivated) document.getElementById('speakerActivationImage').src = 'images/icons/speaker_on.svg';
+        else document.getElementById('speakerActivationImage').src = 'images/icons/speaker_off.svg';
+        if (!callStatus.speakerActivated && callStatus.microphoneActivated) {
+            callStatus.microphoneActivated = false;
+            document.getElementById('microphoneActivationImage').src = 'images/icons/microphone_off.svg';
+        }
+    })
     onkeydown = onkeyup = keyReact;
     setInterval(setLifeBarColor, 10);
     setInterval(keyStatusServerCommunication, 30);

@@ -2,10 +2,9 @@ html, body, p, div, nav, header, footer, h1, h2, h3, h4, h5, h6, span, input, bu
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
-    cursor: auto;
 }
 
-input {
+input, button {
     all: unset;
 }
 
@@ -15,6 +14,6 @@ a {
 }
 
 .yellowPlaceholder::placeholder {
-    color: yellow;
+    color: yellowgreen;
     opacity: 1;
 }
