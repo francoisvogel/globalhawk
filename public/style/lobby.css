@@ -1,8 +1,110 @@
 #lobby {
     color: yellow;
+}
+
+#lobbyUI {
     height: 100%;
-    background: rgb(25,169,146);
-    background: radial-gradient(circle, rgba(25,169,146,1) 0%, rgba(37,112,8,1) 100%);
+    width: 100%;
+    background: rgb(25, 169, 146);
+    background: radial-gradient(circle, rgba(25, 169, 146, 1) 0%, rgba(37, 112, 8, 1) 100%);
+    background-color: white;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#lobbyInfo {
+    z-index: auto;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 2%;
+    left: 2%;
+    height: max-content;
+    width: max-content;
+    padding: 10px;
+    color: yellowgreen;
+    padding: 25px;
+    border: 5px double turquoise;
+    border-radius: 20px;
+    font-size: 20px;
+    background: radial-gradient(circle, rgba(25, 169, 146, 1) 0%, rgba(37, 112, 8, 1) 100%);
+}
+
+.lobbyInfoSubTitle {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.lobbyLink {
+    padding: 5px;
+    font-size: 17px;
+    color: yellow;
+    transition: 0.5s;
+}
+
+.lobbyLink:hover {
+    opacity: 0.5;
+}
+
+.lobbyPopup {
+    z-index: 55;
+    position: fixed;
+    top: 3%;
+    bottom: 3%;
+    right: 3vw;
+    width: 60%;
+    max-width: 700px;
+    border-radius: 5px;
+    background-color: rgb(6, 50, 61);
+    backdrop-filter: blur(10px);
+    overflow-y: auto;
+}
+
+.lobbyPopupTitle {
+    font-size: 40px;
+    background-color:
+    rgb(18, 73, 87);
+    left: 0;
+    right: 0;
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.lobbyPopupElement {
+    padding: 20px;
+}
+
+.changelogTitle {
+    word-wrap: break-word;
+    font-size: 25px;
+}
+
+.changelogDescription {
+    word-wrap: break-word;
+    font-size: 15px;
+}
+
+#lobbyMatchDataInputBox {
+    z-index: 50;
+    position: fixed;
+    display: flex;
+    top: 50%;
+    height: 20%;
+    min-height: 160px;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    width: max-content;
+    padding: 25px;
+    border: 5px double turquoise;
+    border-radius: 20px;
+    font-size: 20px;
+    background: linear-gradient(90deg, rgba(133, 149, 46, 1) 0%, rgba(62, 136, 42, 1) 50%, rgba(20, 142, 157, 1) 100%);
 }
 
 #playerNameInput {
@@ -12,7 +114,22 @@
     border-radius: 20px;
     padding: 10px;
     font-size: 20px;
-    background: linear-gradient(90deg, rgba(133,149,46,1) 0%, rgba(62,136,42,1) 50%, rgba(20,142,157,1) 100%);
+    background: linear-gradient(90deg, rgba(133, 149, 46, 1) 0%, rgba(62, 136, 42, 1) 50%, rgba(20, 142, 157, 1) 100%);
+}
+
+#selectMatch {
+    color: yellow;
+    border: 5px double turquoise;
+    border-radius: 20px;
+    padding: 10px;
+    font-size: 15px;
+    background: linear-gradient(90deg, rgba(133, 149, 46, 1) 0%, rgba(62, 136, 42, 1) 50%, rgba(20, 142, 157, 1) 100%);
+}
+
+.selectMatchOption {
+    background-color: rgba(133, 149, 46, 1);
+    font-size: 15px;
+    color: yellowgreen;
 }
 
 #startGameButton {
@@ -22,11 +139,10 @@
     border-radius: 20px;
     padding: 10px;
     font-size: 20px;
-    background: linear-gradient(90deg, rgba(133,149,46,1) 0%, rgba(62,136,42,1) 50%, rgba(20,142,157,1) 100%);
+    background: linear-gradient(90deg, rgba(133, 149, 46, 1) 0%, rgba(62, 136, 42, 1) 50%, rgba(20, 142, 157, 1) 100%);
 }
 
 #startGameButton:hover {
     color: yellowgreen;
     transform: scale(1.1) skew(10deg, 5deg);
-    cursor: pointer;
 }

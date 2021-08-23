@@ -17,8 +17,7 @@ function setLifeBarColor() {
     if (redRGBLifeBarColor >= 255) {
         redRGBLifeBarColor = 255;
         redRGBLifeBarColorDelta *= -1;
-    }
-    else if (redRGBLifeBarColor <= 50) {
+    } else if (redRGBLifeBarColor <= 50) {
         redRGBLifeBarColor = 50;
         redRGBLifeBarColorDelta *= -1;
     }
@@ -39,10 +38,10 @@ function setState(localState) {
             document.getElementById('scoreBoard').style.visibility = 'hidden';
             break;
         case 1:
-            document.getElementById('chatInput').value = "";
-            document.getElementById('shots').innerHTML = "";
-            document.getElementById('elements').innerHTML = "";
-            document.getElementById('chat').innerHTML = "";
+            document.getElementById('chatInput').value = '';
+            document.getElementById('shots').innerHTML = '';
+            document.getElementById('elements').innerHTML = '';
+            document.getElementById('chat').innerHTML = '';
             document.getElementById('lobby').style.visibility = 'hidden';
             document.getElementById('game').style.visibility = 'visible';
             document.getElementById('scoreBoard').style.visibility = 'hidden';
@@ -57,7 +56,7 @@ function setState(localState) {
 }
 
 function startGameButtonPressed() {
-    socket.emit('game_start_button_pressed', document.getElementById('playerNameInput').value);
+    socket.emit('game_start_button_pressed', document.getElementById('playerNameInput').value, document.getElementById('selectMatch').value);
     pressed['W'.charCodeAt(0)] = pressed['A'.charCodeAt(0)] = pressed['S'.charCodeAt(0)] = pressed['D'.charCodeAt(0)] = pressed[-1] = false;
     setState(1);
     record();
@@ -72,8 +71,7 @@ function keyReact(e) {
         if (e.shiftKey) {
             pressed[-1] = true;
         }
-    }
-    else {
+    } else {
         // console.log(e.keyCode);
         pressed[e.keyCode] = false;
         pressed[-1] = false;
@@ -127,6 +125,7 @@ function percentageWidthToPixel(x) {
 }
 
 const updateRecordTime = 500;
+
 function record() {
     function stopRecord() {
         return (state != 1 || !callStatus.microphoneActivated);
@@ -136,11 +135,11 @@ function record() {
         var mediaRecorder = new MediaRecorder(stream);
         mediaRecorder.start();
         var audioChunks = [];
-        mediaRecorder.addEventListener("dataavailable", function (event) {
+        mediaRecorder.addEventListener('dataavailable', function (event) {
             if (stopRecord()) return;
             audioChunks.push(event.data);
         });
-        mediaRecorder.addEventListener("stop", function () {
+        mediaRecorder.addEventListener('stop', function () {
             if (stopRecord()) return;
             var audioBlob = new Blob(audioChunks);
             audioChunks = [];
@@ -149,7 +148,7 @@ function record() {
             fileReader.onloadend = function () {
                 if (!callStatus.microphoneActivated) return;
                 var base64String = fileReader.result;
-                socket.emit("voice_message", base64String);
+                socket.emit('voice_message', base64String);
             };
             mediaRecorder.start();
             setTimeout(function () {
@@ -161,6 +160,34 @@ function record() {
             mediaRecorder.stop();
         }, updateRecordTime);
     });
+}
+
+function initChangelog() {
+    fetch('/data/changelog.json')
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            appendData(data);
+        })
+        .catch(function (err) {
+            console.log('error: ' + err);
+        });
+    function appendData(data) {
+        data.versions.forEach(function (i) {
+            var newElement = document.createElement('div');
+            newElement.className = 'lobbyPopupElement'
+            var boldPart = document.createElement('p');
+            boldPart.className = "changelogTitle";
+            boldPart.innerHTML = 'Version ' + i.id + ' - Codename: ' + i.codeName;
+            newElement.appendChild(boldPart);
+            var textPart = document.createElement('p');
+            textPart.className = "changelogDescription";
+            textPart.innerHTML = i.description;
+            newElement.appendChild(textPart);
+            document.getElementById('changelog').appendChild(newElement);
+        });
+    }
 }
 
 // adds an element to the game view in terms of percentages
@@ -207,14 +234,11 @@ socket.on('updateBoostBar', (percentage) => {
     document.getElementById('boostText').innerHTML = 'Boost (<i>Shift</i>)';
     if (percentage >= 90) {
         document.getElementById('boostLevel').style.backgroundColor = 'red';
-    }
-    else if (percentage >= 70) {
+    } else if (percentage >= 70) {
         document.getElementById('boostLevel').style.backgroundColor = 'orange';
-    }
-    else if (percentage >= 30) {
+    } else if (percentage >= 30) {
         document.getElementById('boostLevel').style.backgroundColor = 'yellow';
-    }
-    else {
+    } else {
         document.getElementById('boostLevel').style.backgroundColor = 'green';
     }
 });
@@ -232,6 +256,7 @@ socket.on('shotFired', (x1, y1, x2, y2) => {
     var delta = 0.08;
     var line = shotCanvas.getContext('2d');
     var interval = setInterval(display, 1);
+
     function display() {
         shotCanvas.height = window.innerHeight;
         shotCanvas.width = window.innerWidth;
@@ -239,8 +264,7 @@ socket.on('shotFired', (x1, y1, x2, y2) => {
         if (alpha >= 1) {
             delta *= -1;
             alpha = 1;
-        }
-        else if (alpha <= 0) {
+        } else if (alpha <= 0) {
             clearInterval(interval);
             document.getElementById('shots').removeChild(shotCanvas);
             return;
@@ -262,18 +286,15 @@ socket.on('updateLife', (newLife) => {
         document.getElementById('lifeText').innerHTML = 'Life: Excellent';
         document.getElementById('lifeLevel').style.backgroundColor = '#7a7a7a';
         redRGBLifeBarColorActivated = false;
-    }
-    else if (newLife >= 70) {
+    } else if (newLife >= 70) {
         document.getElementById('lifeText').innerHTML = 'Life: High Tier';
         document.getElementById('lifeLevel').style.backgroundColor = '#8f787a';
         redRGBLifeBarColorActivated = false;
-    }
-    else if (newLife >= 20) {
+    } else if (newLife >= 20) {
         document.getElementById('lifeText').innerHTML = 'Life: Low Tier';
         document.getElementById('lifeLevel').style.backgroundColor = '#8c3a3f';
         redRGBLifeBarColorActivated = false;
-    }
-    else {
+    } else {
         document.getElementById('lifeText').innerHTML = 'Life: Dangerously low';
         if (!redRGBLifeBarColorActivated) {
             redRGBLifeBarColorActivated = true;
@@ -283,8 +304,8 @@ socket.on('updateLife', (newLife) => {
 
 socket.on('gameFinishedForPlayer', (win) => {
     socket.emit('game_finished_for_player');
-    if (win) document.getElementById('endAnnouncement').innerHTML = "Congrats for your win! (and your tactical skills)";
-    else document.getElementById('endAnnouncement').innerHTML = "Get to the lobby straight away to play more!";
+    if (win) document.getElementById('endAnnouncement').innerHTML = 'Congrats for your win! (and your tactical skills)';
+    else document.getElementById('endAnnouncement').innerHTML = 'Get to the lobby straight away to play more!';
     setState(2);
 });
 
@@ -296,7 +317,16 @@ socket.on('updateDestroyedCount', (destroyedCount) => {
     document.getElementById('destroyedCount').innerHTML = destroyedCount;
 });
 
-socket.on('launchHome', () => {
+socket.on('launchHome', (matches) => {
+    document.getElementById('selectMatch').innerHTML = "";
+    matches.forEach((i) => {
+        var newElement = document.createElement('option');
+        newElement.className = 'selectMatchOption';
+        newElement.value = i.id;
+        if (i.playerCount != undefined) newElement.innerHTML = i.codeName + ' (' + i.playerCount + ' players)';
+        else newElement.innerHTML = i.codeName;
+        document.getElementById('selectMatch').appendChild(newElement);
+    });
     setState(0);
 });
 
@@ -311,8 +341,7 @@ socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) =
         if (elapsedTime >= 50) {
             document.getElementById('imageEvents').removeChild(newElement);
             clearInterval(interval);
-        }
-        else if (elapsedTime >= 25) {
+        } else if (elapsedTime >= 25) {
             fadeDegree = 50 - elapsedTime;
         }
         newElement.style.opacity = fadeDegree / 25;
@@ -327,7 +356,7 @@ socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) =
     newElement.setAttribute('width', proposedWidth);
     var topOffset = top - targetHeight / 2;
     var leftOffset = left - targetWidth / 2;
-    var styleAssign = /*'background-size: cover; box-shadow: 0px 10px 20px -5px rgba(0,0,0,.8); background: linear-gradient(#004092, #020202, transparent), url(\'images/'+source+'\') no-repeat center;*/' z-index: -1; object-fit: fill; position: absolute; top: ' + topOffset + '%; left: ' + leftOffset + '%;';
+    var styleAssign = /*'background-size: cover; box-shadow: 0px 10px 20px -5px rgba(0,0,0,.8); background: linear-gradient(#004092, #020202, transparent), url(\'images/'+source+'\') no-repeat center;*/ ' z-index: -1; object-fit: fill; position: absolute; top: ' + topOffset + '%; left: ' + leftOffset + '%;';
     newElement.style = styleAssign;
     document.getElementById('imageEvents').appendChild(newElement);
     var elapsedTime = 0;
@@ -337,6 +366,7 @@ socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) =
 socket.on('addChatComment', (author, content) => {
     function remove() {
         var opacity = 1;
+
         function realRemove() {
             opacity -= 0.001;
             newElement.style.opacity = opacity;
@@ -348,7 +378,7 @@ socket.on('addChatComment', (author, content) => {
         var interval = setInterval(realRemove, 1);
     }
     var newElement = document.createElement('div');
-    newElement.style = "margin-top: 5px; font-size: 15px;";
+    newElement.style = 'margin-top: 5px; font-size: 15px;';
     var boldPart = document.createElement('b');
     boldPart.innerHTML = author + ': ';
     newElement.appendChild(boldPart);
@@ -369,7 +399,7 @@ socket.on('addImportantComment', (content) => {
         function realRemove() {
             document.getElementById('importantComment').style.opacity -= 0.01;
             if (document.getElementById('importantComment').style.opacity <= 0) {
-                document.getElementById('importantComment').innerHTML = "";
+                document.getElementById('importantComment').innerHTML = '';
                 clearInterval(interval);
             }
         }
@@ -398,7 +428,7 @@ function init() {
             lastInput = Date.now();
             socket.emit('chat_message_sent', $('#chatInput').val());
             console.log($('#chatInput').val());
-            $('#chatInput').val("");
+            $('#chatInput').val('');
         }
     });
     document.getElementById('microphoneActivation').addEventListener('click', () => {
@@ -417,12 +447,37 @@ function init() {
             callStatus.microphoneActivated = false;
             document.getElementById('microphoneActivationImage').src = 'images/icons/microphone_off.svg';
         }
-    })
+    });
+    initChangelog();
+    document.getElementById('lobbyUI').addEventListener('click', () => {
+        document.getElementById('changelog').style.visibility = 'hidden';
+        document.getElementById('bugBounty').style.visibility = 'hidden';
+        document.getElementById('ourTeam').style.visibility = 'hidden';
+        document.getElementById('lobbyUI').style.filter = "";
+    });
+    document.getElementById('changelogButton').addEventListener('click', () => {
+        document.getElementById('changelog').style.visibility = 'visible';
+        document.getElementById('bugBounty').style.visibility = 'hidden';
+        document.getElementById('ourTeam').style.visibility = 'hidden';
+        document.getElementById('lobbyUI').style.filter = "blur(5px)";
+    });
+    document.getElementById('bugBountyButton').addEventListener('click', () => {
+        document.getElementById('changelog').style.visibility = 'hidden';
+        document.getElementById('bugBounty').style.visibility = 'visible';
+        document.getElementById('ourTeam').style.visibility = 'hidden';
+        document.getElementById('lobbyUI').style.filter = "blur(5px)";
+    });
+    document.getElementById('ourTeamButton').addEventListener('click', () => {
+        document.getElementById('changelog').style.visibility = 'hidden';
+        document.getElementById('bugBounty').style.visibility = 'hidden';
+        document.getElementById('ourTeam').style.visibility = 'visible';
+        document.getElementById('lobbyUI').style.filter = "blur(5px)";
+    });
     onkeydown = onkeyup = keyReact;
     setInterval(setLifeBarColor, 10);
     setInterval(keyStatusServerCommunication, 30);
     // eslint-disable-next-line no-unused-vars
-    $("body").on("contextmenu", function (e) {
+    $('body').on('contextmenu', function (e) {
         return false;
     });
 }

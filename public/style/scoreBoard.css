@@ -36,27 +36,3 @@
     color: yellowgreen;
     transform: scale(1.1) skew(30deg, 15deg);
 }
-
-#scoreBoardRightColumn {
-    height: 100%;
-    position: absolute;
-    right: 0%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.socialMediaShare {
-    height: 50px;
-    width: 50px;
-    padding: 15px;
-    margin: 10px;
-    transition: 0.5s;
-    border-radius: 1px;
-}
-
-.socialMediaShare:hover {
-    background-color: rgba(0, 0, 0, 0.5);
-    transform: scale(1.3);
-}

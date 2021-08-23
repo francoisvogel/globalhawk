@@ -1,0 +1,20 @@
+{
+    "arena": [
+        {
+            "id": 0,
+            "codeName": "Berlin, Germany"
+        },
+        {
+            "id": 1,
+            "codeName": "Paris, France"
+        },
+        {
+            "id": 2,
+            "codeName": "NYC, USA"
+        },
+        {
+            "id": 3,
+            "codeName": "Los Angeles, USA"
+        }
+    ]
+}

@@ -1,5 +1,5 @@
-require("dotenv").config();
-// const fs = require('fs');
+require('dotenv').config();
+const fs = require('fs');
 const express = require('express');
 const app = express();
 const http = require('http');
@@ -9,7 +9,7 @@ const io = new Server(server);
 const path = require('path');
 // const { type } = require('jquery');
 // const jsdom = require('jsdom');
-// const dom = new jsdom.JSDOM("");
+// const dom = new jsdom.JSDOM('');
 // const jquery = require('jquery')(dom.window);
 
 const geometry = require('./app/scripts/geometry');
@@ -25,10 +25,13 @@ const totalHeight = process.env.TOTAL_HEIGHT;
 const totalWidth = process.env.TOTAL_WIDTH;
 
 class Match {
-    constructor() {
-        this.matchNumber = 0;
+    constructor(localMode, localMatchNumber, localCodeName) {
+        this.matchNumber = localMatchNumber;
         this.players = [];
         this.elements = [];
+        this.mode = localMode;
+        if (localCodeName == undefined) this.codeName = ''; // optional
+        else this.codeName = localCodeName;
         this.activePlayerCount = 0; // players who are not dead and not disconnected
         this.lightningRadius = 1.5 * Math.sqrt(totalHeight * totalWidth); // storm radius
         this.lightningCenterX = totalHeight / 2;
@@ -119,7 +122,7 @@ class Match {
     }
     refreshView() {
         this.healCheck();
-        this.updateLightningRadius();
+        if (this.mode == 'br') this.updateLightningRadius();
         this.players.forEach(function (i) {
             io.to(i.id).emit('updateBoostBar', i.refresh() * 100);
         });
@@ -275,7 +278,7 @@ class Match {
         });
     }
     oneRemainingCheck() {
-        if (this.players.length <= 1) {
+        if (this.mode == 'br' && this.players.length <= 1) {
             io.to(this.matchNumber).emit('gameFinishedForPlayer', true);
             this.activeMatch = false;
         }
@@ -283,14 +286,28 @@ class Match {
 }
 
 function refreshViewAllMatches() {
-    for (var i = 0; i < matches.length; i++) {
+    for (let i = 0; i < matches.length; i++) {
         if (matches[i].activeMatch == true) matches[i].refreshView();
+    }
+    for (let i = 0; i < arena.length; i++) {
+        if (arena[i].activeMatch) arena[i].refreshView();
     }
 }
 
-setInterval(refreshViewAllMatches, process.env.REFRESH);
+function initArenaMatches() {
+    const jsonString = fs.readFileSync(process.env.DB+'/arena.json');
+    const jsonData = JSON.parse(jsonString);
+    jsonData.arena.forEach(function (i) {
+        arena.push(new Match('arena', i.id, i.codeName));
+    });
+}
+
 var matches = [];
-matches.push(new Match());
+matches.push(new Match('br', 1000));
+var arena = [];
+
+setInterval(refreshViewAllMatches, process.env.REFRESH);
+initArenaMatches();
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -302,6 +319,18 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/pages/index.html'));
 });
 
+app.get('/bugReporting', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/pages/bugReporting.html'));
+});
+
+app.get('/emails/development', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/pages/emails/development.html'));
+});
+
+app.get('/emails/marketing', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/pages/emails/marketing.html'));
+});
+
 ////////////////////////////////////
 ////////////////////////////////////
 ////////////////////////////////////
@@ -311,16 +340,38 @@ io.on('connection', (socket) => {
         if (thisPlayer == undefined) return false;
         return true;
     }
-    socket.emit('launchHome');
+    var matchesClientData = [];
+    matchesClientData.push({
+        id: 1000,
+        codeName: 'Battle Royal',
+        playerCount: undefined // desired
+    });
+    for (var i = 0; i < arena.length; i++) {
+        matchesClientData.push({
+            id: arena[i].matchNumber,
+            codeName: 'Arena: '+arena[i].codeName,
+            playerCount: arena[i].players.length
+        });
+    }
+    socket.emit('launchHome', matchesClientData);
     var thisPlayer = null;
     var selectedMatch;
-    socket.on('game_start_button_pressed', (arg) => {
-        if (arg != "") {
-            thisPlayer.playerName = arg;
-        }
+    socket.on('game_start_button_pressed', (localPlayerName, matchCode) => {      
         console.log('game_start_button_pressed');
         thisPlayer = new Player(socket.id);
-        selectedMatch = matches[matches.length - 1];
+        if (localPlayerName != '') {
+            thisPlayer.playerName = localPlayerName;
+        }
+        if (matchCode == 1000) {
+            selectedMatch = matches[matches.length - 1];
+        }
+        else if (matchCode < arena.length) {
+            selectedMatch = arena[matchCode];
+        }
+        else { // hacking attempt
+            socket.disconnect();
+            console.log('prevented hacking attempt');
+        }
         socket.join(selectedMatch.matchNumber);
         selectedMatch.addPlayer(thisPlayer);
         socket.emit('updateDestroyedCount', thisPlayer.destroyedCount);
@@ -414,7 +465,7 @@ io.on('connection', (socket) => {
     socket.on('voice_message', (data) => {
         if (!sanityCheck()) return;
         var newData = data.split(';');
-        newData[0] = "data:audio/ogg;";
+        newData[0] = 'data:audio/ogg;';
         newData = newData[0]+newData[1];
         socket.to(selectedMatch.matchNumber).emit('voiceMessage', newData);
     })
