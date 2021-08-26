@@ -10,6 +10,10 @@ var callStatus = { // initialization state, then kept over games
     microphoneActivated: false,
     speakerActivated: true
 };
+var mouse = {
+    x: 0,
+    y: 0
+}
 
 function setLifeBarColor() {
     if (state != 1 || !redRGBLifeBarColorActivated) return;
@@ -124,6 +128,18 @@ function percentageWidthToPixel(x) {
     return (x * window.innerWidth) / 100;
 }
 
+function getMouseRelativePosition() {
+    var mouseX = mouse.x; // normal that width and height should be inverted (ref. project standards)
+    var mouseY = mouse.y;
+    var compareX = window.innerWidth / 2;
+    var compareY = window.innerHeight / 2;
+    // console.log(mouseX, compareX);
+    // console.log(mouseY, compareY);
+    var x = mouseX - compareX;
+    var y = mouseY - compareY;
+    return { x, y };
+}
+
 const updateRecordTime = 500;
 
 function record() {
@@ -178,11 +194,11 @@ function initChangelog() {
             var newElement = document.createElement('div');
             newElement.className = 'lobbyPopupElement'
             var boldPart = document.createElement('p');
-            boldPart.className = "changelogTitle";
+            boldPart.className = 'changelogTitle';
             boldPart.innerHTML = 'Version ' + i.id + ' - Codename: ' + i.codeName;
             newElement.appendChild(boldPart);
             var textPart = document.createElement('p');
-            textPart.className = "changelogDescription";
+            textPart.className = 'changelogDescription';
             textPart.innerHTML = i.description;
             newElement.appendChild(textPart);
             document.getElementById('changelog').appendChild(newElement);
@@ -191,8 +207,7 @@ function initChangelog() {
 }
 
 // adds an element to the game view in terms of percentages
-socket.on('addElementToGameView', (top, left, targetHeight, targetWidth, source, id) => {
-    // console.log('E');
+socket.on('addElementToGameView', (top, left, targetHeight, targetWidth, source, id, specialInfo) => {
     var element = document.getElementById(id);
     if (element == null) {
         element = document.createElement('img');
@@ -208,6 +223,24 @@ socket.on('addElementToGameView', (top, left, targetHeight, targetWidth, source,
     var leftOffset = left - targetWidth / 2;
     var styleAssign = 'z-index: -1; object-fit:fill; position: absolute; top: ' + topOffset + '%; left: ' + leftOffset + '%;';
     element.style = styleAssign;
+    if (specialInfo == 'Weapon') {
+        element.style.zIndex = 5;
+        var mouseOffset = getMouseRelativePosition();
+        var xOffset = mouseOffset.x;
+        var yOffset = mouseOffset.y;
+        var angle = Math.atan(xOffset / yOffset) * (180 / Math.PI);
+        if (yOffset < 0) {
+            angle = -angle;
+        }
+        else {
+            angle = 180-angle;
+        }
+        // console.log(xOffset, yOffset, angle);
+        element.style.transform = 'rotate(' + angle + 'deg)';
+    }
+    else if (specialInfo == 'Player') {
+        element.style.zIndex = 4;
+    }
 });
 
 socket.on('removeElementFromGameView', (id) => {
@@ -318,7 +351,7 @@ socket.on('updateDestroyedCount', (destroyedCount) => {
 });
 
 socket.on('launchHome', (matches) => {
-    document.getElementById('selectMatch').innerHTML = "";
+    document.getElementById('selectMatch').innerHTML = '';
     matches.forEach((i) => {
         var newElement = document.createElement('option');
         newElement.className = 'selectMatchOption';
@@ -333,6 +366,11 @@ socket.on('launchHome', (matches) => {
 socket.on('sendUserScreenRatio', () => {
     socket.emit('user_screen_ratio', window.innerWidth / window.innerHeight);
 });
+
+socket.on('updateWeaponInfo', (weapon) => {
+    document.getElementById('weaponName').innerHTML = weapon;
+    document.getElementById('weaponImage').setAttribute('src', './images/weapons/'+weapon+'.svg');
+})
 
 socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) => {
     function dynamicDisplay() {
@@ -453,27 +491,43 @@ function init() {
         document.getElementById('changelog').style.visibility = 'hidden';
         document.getElementById('bugBounty').style.visibility = 'hidden';
         document.getElementById('ourTeam').style.visibility = 'hidden';
-        document.getElementById('lobbyUI').style.filter = "";
+        document.getElementById('lobbyUI').style.filter = '';
     });
     document.getElementById('changelogButton').addEventListener('click', () => {
         document.getElementById('changelog').style.visibility = 'visible';
         document.getElementById('bugBounty').style.visibility = 'hidden';
         document.getElementById('ourTeam').style.visibility = 'hidden';
-        document.getElementById('lobbyUI').style.filter = "blur(5px)";
+        document.getElementById('lobbyUI').style.filter = 'blur(5px)';
     });
     document.getElementById('bugBountyButton').addEventListener('click', () => {
         document.getElementById('changelog').style.visibility = 'hidden';
         document.getElementById('bugBounty').style.visibility = 'visible';
         document.getElementById('ourTeam').style.visibility = 'hidden';
-        document.getElementById('lobbyUI').style.filter = "blur(5px)";
+        document.getElementById('lobbyUI').style.filter = 'blur(5px)';
     });
     document.getElementById('ourTeamButton').addEventListener('click', () => {
         document.getElementById('changelog').style.visibility = 'hidden';
         document.getElementById('bugBounty').style.visibility = 'hidden';
         document.getElementById('ourTeam').style.visibility = 'visible';
-        document.getElementById('lobbyUI').style.filter = "blur(5px)";
+        document.getElementById('lobbyUI').style.filter = 'blur(5px)';
+    });
+    document.getElementById('settingsButton').addEventListener('click', () => {
+        document.getElementById('settings').style.visibility = 'visible';
+        document.getElementById('staticElements').style.pointerEvents = 'none';
+        document.getElementById('staticElements').style.backgroundColor = 'red';
+        document.getElementById('staticElements').style.opacity = 0.3;
+    });
+    document.getElementById('settingsHideButton').addEventListener('click', () => {
+        document.getElementById('settings').style.visibility = 'hidden';
+        document.getElementById('staticElements').style.pointerEvents = 'auto';
+        document.getElementById('staticElements').style.opacity = 1;
+        document.getElementById('staticElements').style.backgroundColor = 'transparent';
     });
     onkeydown = onkeyup = keyReact;
+    document.addEventListener('mousemove', (event) => {
+        mouse.x = event.x;
+        mouse.y = event.y;
+    });
     setInterval(setLifeBarColor, 10);
     setInterval(keyStatusServerCommunication, 30);
     // eslint-disable-next-line no-unused-vars

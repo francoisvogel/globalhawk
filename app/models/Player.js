@@ -17,7 +17,7 @@ class Player {
         this.x;
         this.y;
         this.shape = 'rect';
-        this.weapon = 0; // originally no weapon is equipped
+        this.weapon = 'laser'; // originally no weapon is equipped
         this.playerName = "BuzzDroner"; // default name
         this.immortal = false;
         this.removed = false; // indicated whether element has been removed of player view

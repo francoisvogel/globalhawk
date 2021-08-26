@@ -8,31 +8,28 @@
     background: rgb(25, 169, 146);
     background: radial-gradient(circle, rgba(25, 169, 146, 1) 0%, rgba(37, 112, 8, 1) 100%);
     background-color: white;
-    height: 100%;
     width: 100%;
     position: fixed;
     top: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     transition: 0.3s;
 }
 
 #lobbyInfo {
+    overflow: auto;
     z-index: auto;
     display: flex;
     flex-direction: column;
-    position: fixed;
+    justify-content: space-between;
+    position: absolute;
     top: 2%;
     left: 2%;
-    height: max-content;
-    width: max-content;
-    padding: 10px;
+    right: 75%;
+    bottom: 50%;
     color: yellowgreen;
     padding: 25px;
     border: 5px double turquoise;
     border-radius: 20px;
-    font-size: 20px;
+    font-size: 15px;
     background: radial-gradient(circle, rgba(25, 169, 146, 1) 0%, rgba(37, 112, 8, 1) 100%);
 }
 
@@ -43,7 +40,7 @@
 
 .lobbyLink {
     padding: 5px;
-    font-size: 17px;
+    font-size: 13px;
     color: yellow;
     transition: 0.5s;
 }
@@ -58,18 +55,17 @@
     top: 3%;
     bottom: 3%;
     right: 3vh;
-    width: 60%;
+    width: 40%;
     max-width: 700px;
     border-radius: 5px;
-    background-color: rgb(6, 50, 61);
+    background: radial-gradient(circle, rgb(32, 128, 83) 0%, rgb(8, 112, 95) 100%);
     backdrop-filter: blur(10px);
     overflow-y: auto;
 }
 
 .lobbyPopupTitle {
     font-size: 40px;
-    background-color:
-    rgb(18, 73, 87);
+    background-color:rgb(18, 73, 87);
     left: 0;
     right: 0;
     border-radius: 5px;
@@ -91,16 +87,17 @@
 }
 
 #lobbyMatchDataInputBox {
+    overflow: auto;
     z-index: 50;
-    position: fixed;
+    position: absolute;
     display: flex;
-    top: 50%;
-    height: 20%;
-    min-height: 160px;
+    top: 20%;
+    bottom: 50%;
+    left: 30%;
+    right: 35%;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
-    width: max-content;
     padding: 25px;
     border: 5px double turquoise;
     border-radius: 20px;

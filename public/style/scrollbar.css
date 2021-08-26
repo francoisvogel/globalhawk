@@ -1,4 +1,4 @@
-/* width */
+/* Width */
 
 ::-webkit-scrollbar {
     width: 10px;
@@ -7,13 +7,14 @@
 /* Track */
 
 ::-webkit-scrollbar-track {
-    background: rgb(6, 50, 61);
+    /* background: rgb(6, 50, 61); */
+    background-color: transparent;
 }
 
 /* Handle */
 
 ::-webkit-scrollbar-thumb {
-    border-radius: 10px;
+    border-radius: 15px;
     background: rgb(131, 131, 131);
 }
 
@@ -21,4 +22,10 @@
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgb(105, 105, 105);
+}
+
+/* Corner */
+
+::-webkit-scrollbar-corner {
+    background-color: transparent;
 }

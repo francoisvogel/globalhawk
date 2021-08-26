@@ -20,6 +20,7 @@ const Background = require('./app/models/Background');
 const Player = require('./app/models/Player');
 const Cloud = require('./app/models/Cloud');
 const Heal = require('./app/models/Heal');
+const Weapon = require('./app/models/Weapon');
 
 const totalHeight = process.env.TOTAL_HEIGHT;
 const totalWidth = process.env.TOTAL_WIDTH;
@@ -125,12 +126,14 @@ class Match {
         if (this.mode == 'br') this.updateLightningRadius();
         this.players.forEach(function (i) {
             io.to(i.id).emit('updateBoostBar', i.refresh() * 100);
+            io.to(i.id).emit('updateWeaponInfo', i.weapon);
         });
         this.elements.forEach(function (i) {
             if (!i.immortal && i.life == 0 && !i.removed) {
                 io.emit('removeElementFromGameView', i.id);
                 i.removed = true;
             }
+            if (i.refreshElement != undefined) i.refreshElement();
         });
         for (var i = 0; i < this.players.length; i++) if (this.players[i].exists) {
             io.to(this.players[i].id).emit('updateLife', this.players[i].life);
@@ -142,7 +145,7 @@ class Match {
                 var fromTop = (this.elements[j].x - (this.players[i].x - actualHeight / 2)) / actualHeight * 100;
                 var fromLeft = (this.elements[j].y - (this.players[i].y - actualWidth / 2)) / actualWidth * 100;
                 // console.log(i.id);
-                io.to(this.players[i].id).emit('addElementToGameView', Number(fromTop), Number(fromLeft), this.elements[j].height * 100 / actualHeight, this.elements[j].width * 100 / actualWidth, this.elements[j].code(), this.elements[j].id);
+                io.to(this.players[i].id).emit('addElementToGameView', Number(fromTop), Number(fromLeft), this.elements[j].height * 100 / actualHeight, this.elements[j].width * 100 / actualWidth, this.elements[j].code(), this.elements[j].id, this.elements[j].constructor.name);
             }
         }
     }
@@ -156,14 +159,37 @@ class Match {
         return true;
     }
     calculateFreeCoordinates() {
-        return [totalHeight - 1000, totalWidth - 1000];
+        var bestCoordinates = [totalHeight/2, totalWidth/2];
+        var bestDistance = 0;
+        var mersenneTwisterRandomNumberGenerator = new random.MersenneTwister(Date.now());
+        for (let i = 0; i < 100; i++) {
+            var localCoordinates = [mersenneTwisterRandomNumberGenerator.genrand_int31()%(totalHeight-new Player().height)+new Player().height/2, mersenneTwisterRandomNumberGenerator.genrand_int31()%(totalWidth-new Player().width)+new Player().width/2];
+            var collision = false;
+            for (let j = 0; j < this.elements.length; j++) {
+                if (this.elements[j].obstacle && geometry.euclideanDistance(this.elements[j].x, this.elements[j].y, localCoordinates[0], localCoordinates[1]) <= this.elements[j].height+this.elements[j].width) {
+                    collision = true;
+                    break;
+                }
+            }
+            if (collision) continue;
+            var localDistance = Infinity;
+            for (let j = 0; j < this.players.length; j++) {
+                localDistance = Math.min(localDistance, geometry.euclideanDistance(localCoordinates[0], localCoordinates[1], this.players[j].x, this.players[j].y));
+            }
+            if (localDistance > bestDistance) {
+                bestDistance = localDistance;
+                bestCoordinates = localCoordinates;
+            }
+        }
+        return bestCoordinates;
     }
     addPlayer(player) {
-        this.players.push(player);
-        this.elements.push(player); // elements contains all elements (drones, clouds, items)
         var coordinates = this.calculateFreeCoordinates();
         player.x = coordinates[0];
         player.y = coordinates[1];
+        this.players.push(player);
+        this.elements.push(player); // elements contains all elements (drones, clouds, items)
+        this.elements.push(new Weapon(player));
         this.activePlayerCount++;
         io.to(this.matchNumber).emit('updatePlayerCount', this.players.length);
         io.to(this.matchNumber).emit('addChatComment', 'system', player.playerName + ' joined the match.');
@@ -179,7 +205,12 @@ class Match {
         for (let i = x; i < this.elements.length; i++) this.elements[i] = this.elements[i + 1];
         this.elements.pop();
         this.activePlayerCount--;
-        // io.to(this.matchNumber).emit('removeElementFromGameView', player.id); // not needed any more
+        for (let i = 0; i < this.elements.length; i++) if (this.elements[i].constructor.name == 'Weapon' && this.elements[i].player == player) {
+            io.to(this.matchNumber).emit('removeElementFromGameView', this.elements[i].id);
+            this.elements[i].life = 0;
+            this.elements.splice(i);
+            break;
+        }
         io.to(this.matchNumber).emit('removeElementFromGameView', player.id);
         io.to(this.matchNumber).emit('updatePlayerCount', this.players.length);
         io.to(this.matchNumber).emit('addChatComment', 'system', player.playerName + ' left the match.');
@@ -364,6 +395,9 @@ io.on('connection', (socket) => {
         }
         if (matchCode == 1000) {
             selectedMatch = matches[matches.length - 1];
+            if (matches[matches.length-1].activeMatch == false) {
+                matches[matches.length-1] = new Match();
+            }
         }
         else if (matchCode < arena.length) {
             selectedMatch = arena[matchCode];
