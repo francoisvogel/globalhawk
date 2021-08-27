@@ -14,40 +14,141 @@
 </head>
 
 <body id="body" style="margin: 0;">
-    <div id="staticElements" style="height: 100%; width: 100%; transition: 1s;">
-        <div id="lobby">
-            <div id="ourTeam" class="lobbyPopup" style="visibility: hidden;">
-                <p class="lobbyPopupTitle">
-                    Our Team
-                </p>
-                <p class="lobbyPopupElement">
-                    We are a team of dedicated engineers led by our lead software developer, CEO & Founder <a href="https://francoisvogel.io" style="color: rgb(186, 218, 129)"><i>Francois Vogel</i></a>.
-                </p>
-                <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24"><path d="M24 10.935v2.131l-8 3.947v-2.23l5.64-2.783-5.64-2.79v-2.223l8 3.948zm-16 3.848l-5.64-2.783 5.64-2.79v-2.223l-8 3.948v2.131l8 3.947v-2.23zm7.047-10.783h-2.078l-4.011 16h2.073l4.016-16z"/></svg>
+    <div style="height: 50%; width: 100%;">
+        <div id="staticElements"
+            style="z-index: 90; position: absolute; top: 0; bottom: 0; left: 0; right: 0; transition: 1s;">
+            <div id="lobby">
+                <div id="ourTeam" class="lobbyPopup" style="visibility: hidden;">
+                    <p class="lobbyPopupTitle">
+                        Our Team
+                    </p>
+                    <p class="lobbyPopupElement">
+                        We are a team of dedicated engineers led by our lead software developer, CEO & Founder <a
+                            href="https://francoisvogel.io" style="color: rgb(186, 218, 129)"><i>Francois Vogel</i></a>.
+                    </p>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24">
+                        <path
+                            d="M24 10.935v2.131l-8 3.947v-2.23l5.64-2.783-5.64-2.79v-2.223l8 3.948zm-16 3.848l-5.64-2.783 5.64-2.79v-2.223l-8 3.948v2.131l8 3.947v-2.23zm7.047-10.783h-2.078l-4.011 16h2.073l4.016-16z" />
+                    </svg>
+                </div>
+                <div id="changelog" class="lobbyPopup" style="visibility: hidden;">
+                    <p class="lobbyPopupTitle">
+                        Changelog (<i>New Features & Bug Fixes</i>)<br>
+                        <span style="font-size: 15px;">You can report bugs through the Bug Reporting feature
+                            module.<br>Thank you for helping improving the game.</span>
+                    </p>
+                </div>
+                <div id="bugBounty" class="lobbyPopup" style="visibility: hidden;">
+                    <p class="lobbyPopupTitle">
+                        Bug Bounty Programm
+                    </p>
+                    <p class="lobbyPopupElement">
+                        To be eligible for the bug bounty program, the bug must first be reported with the Bug Reporting
+                        feature module. It may not be disclosed to anyone before we repair it.<br>
+                        Finding a bug is usually rewarded by an announcement of your contribution on this website along with
+                        thanks, with possibly a monetary remuneration.
+                        We reserve ALL RIGHTS to give or NOT to give a bug bounty reward.
+                    </p>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24">
+                        <path
+                            d="M10.921 11.459c-.231.173-.512.267-.801.267-.536 0-.805-.654-.428-1.031.205-.205.469-.336.756-.378.54-.078.777-.748.38-1.146-.397-.397-1.067-.16-1.146.381-.041.286-.173.551-.377.755-.379.379-1.032.109-1.032-.427 0-.29.093-.569.267-.801.329-.438.021-1.079-.54-1.079s-.869.641-.541 1.079c.173.231.267.512.267.801 0 .537-.652.807-1.031.428-.205-.205-.337-.469-.378-.756-.078-.54-.748-.778-1.146-.381-.397.398-.16 1.068.381 1.146.286.041.551.173.755.377.379.38.109 1.032-.428 1.032-.29 0-.569-.093-.801-.267-.437-.328-1.078-.02-1.078.541s.641.869 1.079.541c.231-.173.512-.267.801-.267.537 0 .807.652.428 1.031-.205.205-.469.336-.755.378-.541.078-.778.748-.381 1.146.398.397 1.068.16 1.146-.381.041-.286.173-.551.377-.755.38-.379 1.032-.109 1.032.427 0 .29-.093.569-.267.801-.328.437-.022 1.079.54 1.079.559 0 .871-.64.541-1.08-.173-.229-.267-.509-.267-.796 0-.538.652-.811 1.032-.431.205.205.336.469.377.755.078.541.748.778 1.146.381.397-.397.161-1.069-.382-1.146-.284-.04-.548-.171-.751-.375-.381-.38-.112-1.034.425-1.034.289 0 .568.093.801.267.435.327 1.078.021 1.078-.541s-.642-.868-1.079-.541zm-3.576 1.432c-.183 0-.33-.148-.33-.33s.147-.33.33-.33c.182 0 .33.148.33.33s-.148.33-.33.33zm.421-1.048c-.286 0-.518-.231-.518-.518s.232-.518.518-.518c.286 0 .518.231.518.518s-.232.518-.518.518zm.976.99c-.242 0-.438-.196-.438-.438s.196-.438.438-.438.438.196.438.438-.196.438-.438.438zm2.196 7.167h-10.938v-20h21v11.462c-.594-.472-1.269-.843-2-1.094v-4.368h-17v12h8.212c.136.713.384 1.386.726 2zm13.062 2.586l-2.831-2.832c.522-.79.831-1.735.831-2.754 0-2.761-2.238-5-5-5s-5 2.239-5 5 2.238 5 5 5c1.019 0 1.964-.309 2.755-.832l2.831 2.832 1.414-1.414zm-10-5.586c0-1.654 1.346-3 3-3s3 1.346 3 3-1.346 3-3 3-3-1.346-3-3z" />
+                    </svg>
+                </div>
+                <div id="lobbyUI">
+                    <div id="lobbyMatchDataInputBox">
+                        <input type="text" id="playerNameInput" class="yellowPlaceholder" placeholder="Enter your nickname"
+                            maxlength="15">
+                        <select id="selectMatch" name="selectMatch">
+                        </select>
+                        <button type="button" id="startGameButton">Enter matchmaking</button>
+                    </div>
+                    <div class="socialMediaShareColumn">
+                        <a><img src="./images/icons/instagram.svg" class="socialMediaShare"></a>
+                        <a><img src="./images/icons/twitter.svg" class="socialMediaShare"></a>
+                        <a><img src="./images/icons/youtube.svg" class="socialMediaShare"></a>
+                        <a><img src="./images/icons/facebook.svg" class="socialMediaShare"></a>
+                    </div>
+                </div>
+                <div id="lobbyInfo">
+                    <b class="lobbyInfoSubTitle">About us</b>
+                    <button id="ourTeamButton" class="lobbyLink">Our team</button>
+                    <b class="lobbyInfoSubTitle">Update Information</b>
+                    <button id="changelogButton" class="lobbyLink">View changelog</button>
+                    <b class="lobbyInfoSubTitle">Contact</b>
+                    <a href="emails/development" class="lobbyLink" target="_blank">Development team email</a>
+                    <a href="emails/marketing" class="lobbyLink" target="_blank">Marketing & Product team email</a>
+                    <b class="lobbyInfoSubTitle">Technical Options</b>
+                    <a href="bugReporting" class="lobbyLink">Bug Reporting</a>
+                    <button id="bugBountyButton" class="lobbyLink">Bug Bounty Program</button>
+                </div>
             </div>
-            <div id="changelog" class="lobbyPopup" style="visibility: hidden;">
-                <p class="lobbyPopupTitle">
-                    Changelog (<i>New Features & Bug Fixes</i>)<br>
-                    <span style="font-size: 15px;">You can report bugs through the Bug Reporting feature module.<br>Thank you for helping improving the game.</span>
-                </p>
+            <div id="game"
+                style="visibility: hidden; user-select: none; background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
+                <div id="gameElements" style="cursor: crosshair;">
+                    <div id="elements" style="z-index: -1"></div>
+                    <div id="shots" style="z-index: 50"></div>
+                    <img id="lightning" src="/images/backgrounds/lightning.svg"
+                        style="position: absolute; height: 0; width: 0;">
+                    <div id="imageEvents"></div>
+                </div>
+                <div id="ui">
+                    <div
+                        style="z-index: 20; position: absolute; left: 20%; bottom: 20px; width: 60%; height: 15px; background-color: black; border: 2px solid black; border-radius: 100px; opacity: 80%">
+                        <p id="lifeText" style="position: absolute; top: 0; color:white; left: 8px; font-size: 13px;"></p>
+                        <div id="lifeLevel" style="height: 100%; border-radius: 100px;"></div>
+                    </div>
+                    <div
+                        style="z-index: 20; position: absolute; left: 20%; bottom: 50px; width: 60%; height: 15px; background-color: black; border: 2px solid black; border-radius: 100px; opacity: 80%">
+                        <p id="boostText" style="position: absolute; top: 0; color:white; left: 8px; font-size: 13px;"></p>
+                        <div id="boostLevel" style="height: 100%; border-radius: 100px;"></div>
+                    </div>
+                    <div
+                        style="opacity: 60%; background-color: gainsboro; padding: 5px; border-radius: 5px; width: 70px; height: 150px; position: absolute; top: 1%; left: 1%; display: flex; flex-direction: column; justify-content: space-around; align-items: center;">
+                        <p style="font-size: small;">Voice Chat</p>
+                        <button id="microphoneActivation" type="button"><img id="microphoneActivationImage"
+                                src="./images/icons/microphone_off.svg" style="height: 50px; width: 50px;"></button>
+                        <button id="speakerActivation" type="button"><img id="speakerActivationImage"
+                                src="./images/icons/speaker_on.svg" style="height: 50px; width: 50px;"></button>
+                    </div>
+                    <div style="opacity: 80%; width: 300px; overflow: hidden; position: absolute; top: 1%; right: 1%;">
+                        <div style="text-align: center; display: flex; flex-direction: row; justify-content: space-around;">
+                            <div style="border-radius: 20px; background-color: gainsboro; padding: 5px; min-width: 100px;">
+                                <p id="playerCount" style="font-size: 40px;"></p>
+                                <p style="font-size: 15px;">players</p>
+                            </div>
+                            <div style="border-radius: 20px; background-color: gainsboro; padding: 5px; min-width: 100px;">
+                                <p id="destroyedCount" style="font-size: 40px;"></p>
+                                <p style="font-size: 15px;">destroyed</p>
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <input type="text" id="chatInput" placeholder="Enter a message" maxlength="100"
+                                style="width: 100%; color: yellow;" class="yellowPlaceholder">
+                            <div id="chat"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div
+                            style="position: absolute; bottom: 1%; left: 1%; width: 5%; height: 20%; padding: 3px; border-radius: 5px; background-color: gainsboro; opacity: 0.7;">
+                            <p id="weaponName" style="position: absolute; top: 0; text-align: center;"></p>
+                            <img id="weaponImage"
+                                style="left: 10%; right: 10%; bottom: -65%; position: absolute; height: 150%; width: 80%;">
+                        </div>
+                    </div>
+                    <div id="importantComment"
+                        style="position: absolute; left: 10%; bottom: 90px; color: yellow; font-size: 30px; text-align: center; width: 80%;">
+                    </div>
+                </div>
             </div>
-            <div id="bugBounty" class="lobbyPopup" style="visibility: hidden;">
-                <p class="lobbyPopupTitle">
-                    Bug Bounty Programm
-                </p>
-                <p class="lobbyPopupElement">
-                    To be eligible for the bug bounty program, the bug must first be reported with the Bug Reporting feature module. It may not be disclosed to anyone before we repair it.<br>
-                    Finding a bug is usually rewarded by an announcement of your contribution on this website along with thanks, with possibly a monetary remuneration.
-                    We reserve ALL RIGHTS to give or NOT to give a bug bounty reward.
-                </p>
-                <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24"><path d="M10.921 11.459c-.231.173-.512.267-.801.267-.536 0-.805-.654-.428-1.031.205-.205.469-.336.756-.378.54-.078.777-.748.38-1.146-.397-.397-1.067-.16-1.146.381-.041.286-.173.551-.377.755-.379.379-1.032.109-1.032-.427 0-.29.093-.569.267-.801.329-.438.021-1.079-.54-1.079s-.869.641-.541 1.079c.173.231.267.512.267.801 0 .537-.652.807-1.031.428-.205-.205-.337-.469-.378-.756-.078-.54-.748-.778-1.146-.381-.397.398-.16 1.068.381 1.146.286.041.551.173.755.377.379.38.109 1.032-.428 1.032-.29 0-.569-.093-.801-.267-.437-.328-1.078-.02-1.078.541s.641.869 1.079.541c.231-.173.512-.267.801-.267.537 0 .807.652.428 1.031-.205.205-.469.336-.755.378-.541.078-.778.748-.381 1.146.398.397 1.068.16 1.146-.381.041-.286.173-.551.377-.755.38-.379 1.032-.109 1.032.427 0 .29-.093.569-.267.801-.328.437-.022 1.079.54 1.079.559 0 .871-.64.541-1.08-.173-.229-.267-.509-.267-.796 0-.538.652-.811 1.032-.431.205.205.336.469.377.755.078.541.748.778 1.146.381.397-.397.161-1.069-.382-1.146-.284-.04-.548-.171-.751-.375-.381-.38-.112-1.034.425-1.034.289 0 .568.093.801.267.435.327 1.078.021 1.078-.541s-.642-.868-1.079-.541zm-3.576 1.432c-.183 0-.33-.148-.33-.33s.147-.33.33-.33c.182 0 .33.148.33.33s-.148.33-.33.33zm.421-1.048c-.286 0-.518-.231-.518-.518s.232-.518.518-.518c.286 0 .518.231.518.518s-.232.518-.518.518zm.976.99c-.242 0-.438-.196-.438-.438s.196-.438.438-.438.438.196.438.438-.196.438-.438.438zm2.196 7.167h-10.938v-20h21v11.462c-.594-.472-1.269-.843-2-1.094v-4.368h-17v12h8.212c.136.713.384 1.386.726 2zm13.062 2.586l-2.831-2.832c.522-.79.831-1.735.831-2.754 0-2.761-2.238-5-5-5s-5 2.239-5 5 2.238 5 5 5c1.019 0 1.964-.309 2.755-.832l2.831 2.832 1.414-1.414zm-10-5.586c0-1.654 1.346-3 3-3s3 1.346 3 3-1.346 3-3 3-3-1.346-3-3z"/></svg>
-            </div>
-            <div id="lobbyUI">
-                <div id="lobbyMatchDataInputBox">
-                    <input type="text" id="playerNameInput" class="yellowPlaceholder" placeholder="Enter your nickname" maxlength="15">
-                    <select id="selectMatch" name="selectMatch">
-                    </select>
-                    <button type="button" id="startGameButton">Enter matchmaking</button>
+            <div id="scoreBoard"
+                style="visibility: hidden; background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
+                <div id="scoreBoardCentralColumn">
+                    <div id="endAnnouncement"></div>
+                    <button id="backToHomeButton" onclick="setState(0);">Back to lobby</button>
+                    <i>Stats with account synchronization, custom matchmaking & spectating, along many other features are
+                        coming
+                        soon</i>
+                    <i>For those wanting to play on their smartphones, an Android version is under development!</i>
                 </div>
                 <div class="socialMediaShareColumn">
                     <a><img src="./images/icons/instagram.svg" class="socialMediaShare"></a>
@@ -56,90 +157,53 @@
                     <a><img src="./images/icons/facebook.svg" class="socialMediaShare"></a>
                 </div>
             </div>
-            <div id="lobbyInfo">
-                <b class="lobbyInfoSubTitle">About us</b>
-                <button id="ourTeamButton" class="lobbyLink">Our team</button>
-                <b class="lobbyInfoSubTitle">Update Information</b>
-                <button id="changelogButton" class="lobbyLink">View changelog</button>
-                <b class="lobbyInfoSubTitle">Contact</b>
-                <a href="emails/development" class="lobbyLink" target="_blank">Development team email</a>
-                <a href="emails/marketing" class="lobbyLink" target="_blank">Marketing & Product team email</a>
-                <b class="lobbyInfoSubTitle">Technical Options</b>
-                <a href="bugReporting" class="lobbyLink">Bug Reporting</a>
-                <button id="bugBountyButton" class="lobbyLink">Bug Bounty Program</button>
-            </div>
+            <img id="settingsButton" src="./images/icons/settings.svg">
         </div>
-        <div id="game" style="visibility: hidden; user-select: none; background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
-            <div style="cursor: crosshair;">
-                <div id="elements" style="z-index: -1"></div>
-                <div id="shots" style="z-index: 50"></div>
-                <img id="lightning" src="/images/backgrounds/lightning.svg" style="position: absolute; height: 0; width: 0;">
-                <div id="imageEvents"></div>
-            </div>
-            <div id="ui">
-                <div style="z-index: 20; position: absolute; left: 20%; bottom: 20px; width: 60%; height: 15px; background-color: black; border: 2px solid black; border-radius: 100px; opacity: 80%">
-                    <p id="lifeText" style="position: absolute; top: 0; color:white; left: 8px; font-size: 13px;"></p>
-                    <div id="lifeLevel" style="height: 100%; border-radius: 100px;"></div>
+        <div>
+            <div id="settings" style="visibility: hidden;">
+                <div id="settingsTopBar">
+                    <p id="settingsTitle">Settings</p>
+                    <img id="settingsHideButton" src="./images/icons/cross.svg">
                 </div>
-                <div style="z-index: 20; position: absolute; left: 20%; bottom: 50px; width: 60%; height: 15px; background-color: black; border: 2px solid black; border-radius: 100px; opacity: 80%">
-                    <p id="boostText" style="position: absolute; top: 0; color:white; left: 8px; font-size: 13px;"></p>
-                    <div id="boostLevel" style="height: 100%; border-radius: 100px;"></div>
-                </div>
-                <div style="opacity: 60%; background-color: gainsboro; padding: 5px; border-radius: 5px; width: 70px; height: 150px; position: absolute; top: 1%; left: 1%; display: flex; flex-direction: column; justify-content: space-around; align-items: center;">
-                    <p style="font-size: small;">Voice Chat</p>
-                    <button id="microphoneActivation" type="button"><img id="microphoneActivationImage"
-                            src="./images/icons/microphone_off.svg" style="height: 50px; width: 50px;"></button>
-                    <button id="speakerActivation" type="button"><img id="speakerActivationImage"
-                            src="./images/icons/speaker_on.svg" style="height: 50px; width: 50px;"></button>
-                </div>
-                <div style="opacity: 80%; width: 300px; overflow: hidden; position: absolute; top: 1%; right: 1%;">
-                    <div style="text-align: center; display: flex; flex-direction: row; justify-content: space-around;">
-                        <div style="border-radius: 20px; background-color: gainsboro; padding: 5px; min-width: 100px;">
-                            <p id="playerCount" style="font-size: 40px;"></p>
-                            <p style="font-size: 15px;">players</p>
+                <div id="settingsData">
+                    <p class="settingsSubtitle">Audio Volume</p>
+                    <input id="settingsAudioVolumeSelection" class="rangeSlider" type="range" min="0" max="100">
+                    <p class="settingsSubtitle">Quality lo/mid/hi (<i>under development</i>)</p>
+                    <input class="rangeSlider" type="range" min="0" max="2" value="2">
+                    <p class="settingsSubtitle">Key Bindings</p>
+                    <div class="settingsKeyContainer">
+                        <p class="settingsKeyValue">Up</p>
+                        <div>Current Key: <span id="settingsKeyUpValue" class="settingsKeyCurrent">?</span>
                         </div>
-                        <div style="border-radius: 20px; background-color: gainsboro; padding: 5px; min-width: 100px;">
-                            <p id="destroyedCount" style="font-size: 40px;"></p>
-                            <p style="font-size: 15px;">destroyed</p>
+                        <div>
+                            Type new key: <span><input type="text" id="settingsKeyUpInput" maxlength="1" class="settingsKeyInput yellowPlaceholder"></span>
                         </div>
                     </div>
-                    <div style="margin-top: 10px;">
-                        <input type="text" id="chatInput" placeholder="Enter a message" maxlength="100" style="width: 100%; color: yellow;" class="yellowPlaceholder">
-                        <div id="chat"></div>
+                    <div class="settingsKeyContainer">
+                        <p class="settingsKeyValue">Down</p>
+                        <div>Current Key: <span id="settingsKeyDownValue" class="settingsKeyCurrent">?</span>
+                        </div>
+                        <div>
+                            Type new key: <span><input type="text" id="settingsKeyDownInput" maxlength="1" class="settingsKeyInput yellowPlaceholder"></span>
+                        </div>
+                    </div>
+                    <div class="settingsKeyContainer">
+                        <p class="settingsKeyValue">Left</p>
+                        <div>Current Key: <span id="settingsKeyLeftValue" class="settingsKeyCurrent">?</span>
+                        </div>
+                        <div>
+                            Type new key: <span><input type="text" id="settingsKeyLeftInput" maxlength="1" class="settingsKeyInput yellowPlaceholder"></span>
+                        </div>
+                    </div>
+                    <div class="settingsKeyContainer">
+                        <p class="settingsKeyValue">Right</p>
+                        <div>Current Key: <span id="settingsKeyRightValue" class="settingsKeyCurrent">?</span>
+                        </div>
+                        <div>
+                            Type new key: <span><input type="text" id="settingsKeyRightInput" maxlength="1" class="settingsKeyInput yellowPlaceholder"></span>
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <div style="position: absolute; bottom: 1%; left: 1%; width: 5%; height: 20%; padding: 3px; border-radius: 5px; background-color: gainsboro;">
-                        <p id="weaponName" style="position: absolute; top: 0; text-align: center;"></p>
-                        <img id="weaponImage" style="left: 10px; bottom: -65%; position: absolute; height: 150%; width: 80%;">
-                    </div>
-                </div>
-                <div id="importantComment" style="position: absolute; left: 10%; bottom: 90px; color: yellow; font-size: 30px; text-align: center; width: 80%;">
-                </div>
-            </div>
-        </div>
-        <div id="scoreBoard" style="visibility: hidden; background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
-            <div id="scoreBoardCentralColumn">
-                <div id="endAnnouncement"></div>
-                <button id="backToHomeButton" onclick="setState(0);">Back to lobby</button>
-                <i>Stats with account synchronization, custom matchmaking & spectating, along many other features are coming
-                    soon</i>
-                <i>For those wanting to play on their smartphones, an Android version is under development!</i>
-            </div>
-            <div class="socialMediaShareColumn">
-                <a><img src="./images/icons/instagram.svg" class="socialMediaShare"></a>
-                <a><img src="./images/icons/twitter.svg" class="socialMediaShare"></a>
-                <a><img src="./images/icons/youtube.svg" class="socialMediaShare"></a>
-                <a><img src="./images/icons/facebook.svg" class="socialMediaShare"></a>
-            </div>
-        </div>
-        <img id="settingsButton" src="./images/icons/settings.svg">
-    </div>
-    <div style="height: 100%; width: 100%;">
-        <div id="settings" style="visibility: hidden;">
-            <div id="settingsTopBar">
-                <p id="settingsTitle">Settings</p>
-                <img id="settingsHideButton" src="./images/icons/cross.svg">
             </div>
         </div>
     </div>

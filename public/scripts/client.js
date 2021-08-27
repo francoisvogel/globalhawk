@@ -1,35 +1,45 @@
 // eslint-disable-next-line no-undef
 var socket = io();
 var state;
-var redRGBLifeBarColor = 230; // global variable for a very particular use in updateLife if life < 20
-var redRGBLifeBarColorDelta = 3; // same thing as redRGBLifeBarColor
-var redRGBLifeBarColorActivated = false; // same thing as just above
+var redRGBLifeBar = {
+    color: 230,
+    delta: 3,
+    activated: false
+}
 var pressed = {}; // remembers whether which keys are pressed
 var lastInput = 0;
 var callStatus = { // initialization state, then kept over games
     microphoneActivated: false,
     speakerActivated: true
 };
+var audioVolume = 100; // in percentage
 var mouse = {
     x: 0,
     y: 0
 }
+var keybindings = {
+    up: 'W'.charCodeAt(0),
+    right: 'D'.charCodeAt(0),
+    down: 'S'.charCodeAt(0),
+    left: 'A'.charCodeAt(0),
+}
 
 function setLifeBarColor() {
-    if (state != 1 || !redRGBLifeBarColorActivated) return;
-    redRGBLifeBarColor += redRGBLifeBarColorDelta;
-    if (redRGBLifeBarColor >= 255) {
-        redRGBLifeBarColor = 255;
-        redRGBLifeBarColorDelta *= -1;
-    } else if (redRGBLifeBarColor <= 50) {
-        redRGBLifeBarColor = 50;
-        redRGBLifeBarColorDelta *= -1;
+    if (state != 1 || !redRGBLifeBar.activated) return;
+    redRGBLifeBar.color += redRGBLifeBar.delta;
+    if (redRGBLifeBar.color >= 255) {
+        redRGBLifeBar.color = 255;
+        redRGBLifeBar.delta *= -1;
+    } else if (redRGBLifeBar.color <= 50) {
+        redRGBLifeBar.color = 50;
+        redRGBLifeBar.delta *= -1;
     }
-    document.getElementById('lifeLevel').style.backgroundColor = 'rgb(' + redRGBLifeBarColor + ', 0, 0)';
+    document.getElementById('lifeLevel').style.backgroundColor = 'rgb(' + redRGBLifeBar.color + ', 0, 0)';
 }
 
 function beep() {
     var audio = new Audio('audio/events/beep.mp3');
+    audio.volume = audioVolume/100;
     audio.play();
 }
 
@@ -61,7 +71,6 @@ function setState(localState) {
 
 function startGameButtonPressed() {
     socket.emit('game_start_button_pressed', document.getElementById('playerNameInput').value, document.getElementById('selectMatch').value);
-    pressed['W'.charCodeAt(0)] = pressed['A'.charCodeAt(0)] = pressed['S'.charCodeAt(0)] = pressed['D'.charCodeAt(0)] = pressed[-1] = false;
     setState(1);
     record();
 }
@@ -70,7 +79,7 @@ function keyReact(e) {
     if (state != 1) return;
     // console.log('keyReact');
     if (e.type == 'keydown') {
-        // console.log(e.keyCode);
+        console.log(e.keyCode);
         pressed[e.keyCode] = true;
         if (e.shiftKey) {
             pressed[-1] = true;
@@ -84,21 +93,21 @@ function keyReact(e) {
 
 function keyStatusServerCommunication() {
     var chatInput = document.getElementById('chatInput');
-    if (state != 1 || document.activeElement == chatInput) return;
+    if (state != 1 || document.activeElement == chatInput || document.getElementById('settings').style.visibility == 'visible') return;
     var boostActivated = false;
     if (pressed[-1]) boostActivated = true;
     var xShift = 0;
     var yShift = 0;
-    if (pressed['W'.charCodeAt(0)]) {
+    if (pressed[keybindings.up]) {
         xShift -= 1;
     }
-    if (pressed['A'.charCodeAt(0)]) {
+    if (pressed[keybindings.left]) {
         yShift -= 1;
     }
-    if (pressed['S'.charCodeAt(0)]) {
+    if (pressed[keybindings.down]) {
         xShift += 1;
     }
-    if (pressed['D'.charCodeAt(0)]) {
+    if (pressed[keybindings.right]) {
         yShift += 1;
     }
     socket.emit('player_move', xShift, yShift, boostActivated);
@@ -203,6 +212,39 @@ function initChangelog() {
             newElement.appendChild(textPart);
             document.getElementById('changelog').appendChild(newElement);
         });
+    }
+}
+
+function settingsCheck() {
+    var selectedAudioVolume = document.getElementById('settingsAudioVolumeSelection').value;
+    if (audioVolume != selectedAudioVolume) {
+        audioVolume = selectedAudioVolume;
+        beep();
+    }
+    document.getElementById('settingsAudioVolumeSelection').value = audioVolume;
+    document.getElementById('settingsKeyUpValue').innerHTML = String.fromCharCode(keybindings.up);
+    if ($('#settingsKeyUpInput').val().length == 1) {
+        let str = $('#settingsKeyUpInput').val();
+        keybindings.up = str.toUpperCase().charCodeAt(0);
+        $('#settingsKeyUpInput').val('');
+    }
+    document.getElementById('settingsKeyDownValue').innerHTML = String.fromCharCode(keybindings.down);
+    if ($('#settingsKeyDownInput').val().length == 1) {
+        let str = $('#settingsKeyDownInput').val();
+        keybindings.down = str.toUpperCase().charCodeAt(0);
+        $('#settingsKeyDownInput').val('');
+    }
+    document.getElementById('settingsKeyLeftValue').innerHTML = String.fromCharCode(keybindings.left);
+    if ($('#settingsKeyLeftInput').val().length == 1) {
+        let str = $('#settingsKeyLeftInput').val();
+        keybindings.left = str.toUpperCase().charCodeAt(0);
+        $('#settingsKeyLeftInput').val('');
+    }
+    document.getElementById('settingsKeyRightValue').innerHTML = String.fromCharCode(keybindings.right);
+    if ($('#settingsKeyRightInput').val().length == 1) {
+        let str = $('#settingsKeyRightInput').val();
+        keybindings.right = str.toUpperCase().charCodeAt(0);
+        $('#settingsKeyRightInput').val('');
     }
 }
 
@@ -318,19 +360,19 @@ socket.on('updateLife', (newLife) => {
     if (newLife >= 99) {
         document.getElementById('lifeText').innerHTML = 'Life: Excellent';
         document.getElementById('lifeLevel').style.backgroundColor = '#7a7a7a';
-        redRGBLifeBarColorActivated = false;
+        redRGBLifeBar.activated = false;
     } else if (newLife >= 70) {
         document.getElementById('lifeText').innerHTML = 'Life: High Tier';
         document.getElementById('lifeLevel').style.backgroundColor = '#8f787a';
-        redRGBLifeBarColorActivated = false;
+        redRGBLifeBar.activated = false;
     } else if (newLife >= 20) {
         document.getElementById('lifeText').innerHTML = 'Life: Low Tier';
         document.getElementById('lifeLevel').style.backgroundColor = '#8c3a3f';
-        redRGBLifeBarColorActivated = false;
+        redRGBLifeBar.activated = false;
     } else {
         document.getElementById('lifeText').innerHTML = 'Life: Dangerously low';
-        if (!redRGBLifeBarColorActivated) {
-            redRGBLifeBarColorActivated = true;
+        if (!redRGBLifeBar.activated) {
+            redRGBLifeBar.activated = true;
         }
     }
 });
@@ -454,6 +496,7 @@ socket.on('addImportantComment', (content) => {
 
 socket.on('voiceMessage', (data) => {
     var audio = new Audio(data);
+    audio.volume = audioVolume;
     audio.play();
 });
 
@@ -511,18 +554,6 @@ function init() {
         document.getElementById('ourTeam').style.visibility = 'visible';
         document.getElementById('lobbyUI').style.filter = 'blur(5px)';
     });
-    document.getElementById('settingsButton').addEventListener('click', () => {
-        document.getElementById('settings').style.visibility = 'visible';
-        document.getElementById('staticElements').style.pointerEvents = 'none';
-        document.getElementById('staticElements').style.backgroundColor = 'red';
-        document.getElementById('staticElements').style.opacity = 0.3;
-    });
-    document.getElementById('settingsHideButton').addEventListener('click', () => {
-        document.getElementById('settings').style.visibility = 'hidden';
-        document.getElementById('staticElements').style.pointerEvents = 'auto';
-        document.getElementById('staticElements').style.opacity = 1;
-        document.getElementById('staticElements').style.backgroundColor = 'transparent';
-    });
     onkeydown = onkeyup = keyReact;
     document.addEventListener('mousemove', (event) => {
         mouse.x = event.x;
@@ -534,6 +565,16 @@ function init() {
     $('body').on('contextmenu', function (e) {
         return false;
     });
+    document.getElementById('settingsButton').addEventListener('click', () => {
+        document.getElementById('settings').style.visibility = 'visible';
+        document.getElementById('staticElements').style.pointerEvents = 'none';
+    });
+    document.getElementById('settingsHideButton').addEventListener('click', () => {
+        document.getElementById('settings').style.visibility = 'hidden';
+        document.getElementById('staticElements').style.pointerEvents = 'auto';
+    });
+    document.getElementById('settingsAudioVolumeSelection').value = audioVolume;
+    setInterval(settingsCheck, 500);
 }
 
 setTimeout(init, 2);
