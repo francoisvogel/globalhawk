@@ -5,7 +5,7 @@ var socket = io();
 var state;
 var redRGBLifeBar = {
     color: 230,
-    delta: 15,
+    delta: 3,
     activated: false
 }
 var pressed = {}; // remembers whether which keys are pressed
@@ -58,6 +58,7 @@ function setState(localState) {
             document.getElementById('shots').innerHTML = '';
             document.getElementById('elements').innerHTML = '';
             document.getElementById('chat').innerHTML = '';
+            pressed = {};
             document.getElementById('lobby').style.visibility = 'hidden';
             document.getElementById('game').style.visibility = 'visible';
             document.getElementById('scoreBoard').style.visibility = 'hidden';
@@ -111,6 +112,10 @@ function keyStatusServerCommunication() {
     socket.emit('player_move', xShift, yShift, boostActivated);
 }
 
+function pickupItemCheck() {
+    
+}
+
 function userClicked() {
     if ($('#ui:hover').length != 0) {
         return;
@@ -146,7 +151,6 @@ function getMouseRelativePosition() {
 }
 
 const updateRecordTime = 500;
-
 function record() {
     function stopRecord() {
         return (state != 1 || !callStatus.microphoneActivated);
@@ -264,8 +268,8 @@ socket.on('addElementToGameView', (top, left, targetHeight, targetWidth, source,
     var leftOffset = left - targetWidth / 2;
     var styleAssign = 'z-index: -1; object-fit: fill; position: absolute; top: ' + topOffset + '%; left: ' + leftOffset + '%;';
     element.style = styleAssign;
-    element.style.height = proposedHeight+'px';
-    element.style.width = proposedWidth+'px';
+    element.style.height = proposedHeight + 'px';
+    element.style.width = proposedWidth + 'px';
     if (specialInfo == 'Weapon') {
         element.style.zIndex = 5;
         element.style.transform = 'rotate(' + extraInfo + 'deg)';
@@ -313,6 +317,7 @@ socket.on('updateBoostBar', (percentage) => {
     }
 });
 
+const shotFiredRefresh = 1;
 socket.on('shotFired', (x1, y1, x2, y2) => {
     var shotCanvas = document.createElement('canvas');
     shotCanvas.style.zIndex = 10;
@@ -325,12 +330,12 @@ socket.on('shotFired', (x1, y1, x2, y2) => {
     var alpha = 0;
     var delta = 0.08;
     var line = shotCanvas.getContext('2d');
-    var interval = setInterval(display, 5);
+    var interval = setInterval(display, shotFiredRefresh);
 
     function display() {
         shotCanvas.height = window.innerHeight;
         shotCanvas.width = window.innerWidth;
-        alpha += delta;
+        alpha += delta * shotFiredRefresh;
         if (alpha >= 1) {
             delta *= -1;
             alpha = 1;
@@ -423,17 +428,19 @@ socket.on('updateWeaponInfo', (weapon) => {
     document.getElementById('weaponImage').setAttribute('src', './images/weapons/' + weapon + '.svg');
 })
 
+const imageEventRefresh = 1; // ms
+const imageEventShowTime = 200; // ms
 socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) => {
     function dynamicDisplay() {
-        elapsedTime++;
+        elapsedTime += imageEventRefresh;
         var fadeDegree = elapsedTime;
-        if (elapsedTime >= 50) {
+        if (elapsedTime >= imageEventShowTime) {
             document.getElementById('imageEvents').removeChild(newElement);
             clearInterval(interval);
-        } else if (elapsedTime >= 25) {
-            fadeDegree = 50 - elapsedTime;
+        } else if (elapsedTime >= imageEventShowTime / 2) {
+            fadeDegree = imageEventShowTime - elapsedTime;
         }
-        newElement.style.opacity = fadeDegree / 25;
+        newElement.style.opacity = fadeDegree / (imageEventShowTime / 2);
     }
     var newElement = document.createElement('img');
     newElement.setAttribute('src', 'images/events/' + source);
@@ -449,22 +456,24 @@ socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) =
     newElement.style = styleAssign;
     document.getElementById('imageEvents').appendChild(newElement);
     var elapsedTime = 0;
-    var interval = setInterval(dynamicDisplay, 1);
+    var interval = setInterval(dynamicDisplay, imageEventRefresh);
+    console.log('added to refresh');
 });
 
+const addChatCommentRefresh = 10; // ms
 socket.on('addChatComment', (author, content) => {
     function remove() {
         var opacity = 1;
 
         function realRemove() {
-            opacity -= 0.001;
+            opacity -= 0.001 * addChatCommentRefresh;
             newElement.style.opacity = opacity;
             if (opacity <= 0) {
                 clearInterval(interval);
                 document.getElementById('chat').removeChild(newElement);
             }
         }
-        var interval = setInterval(realRemove, 1);
+        var interval = setInterval(realRemove, addChatCommentRefresh);
     }
     var newElement = document.createElement('div');
     newElement.style = 'margin-top: 5px; font-size: 15px;';
@@ -483,16 +492,17 @@ socket.on('addChatComment', (author, content) => {
 
 var importantCommentLastContent;
 var importantCommentLastSetAt = 0;
+const importantCommentRefresh = 10; // ms
 socket.on('addImportantComment', (content) => {
     function remove() {
         function realRemove() {
-            document.getElementById('importantComment').style.opacity -= 0.01;
+            document.getElementById('importantComment').style.opacity -= 0.01 * importantCommentRefresh;
             if (document.getElementById('importantComment').style.opacity <= 0) {
                 document.getElementById('importantComment').innerHTML = '';
                 clearInterval(interval);
             }
         }
-        var interval = setInterval(realRemove, 1);
+        var interval = setInterval(realRemove, importantCommentRefresh);
     }
     if (Date.now() - importantCommentLastSetAt <= 2000 || content == importantCommentLastContent) return;
     importantCommentLastSetAt = Date.now();
