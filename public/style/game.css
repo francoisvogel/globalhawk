@@ -1,0 +1,15 @@
+.item {
+    border-radius: 50%;
+    border: 1px solid gainsboro;
+    background-color: rgba(150, 150, 90, 0.589);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.itemInnerImage {
+    max-height: 100%;
+    max-width: 100%;
+}

@@ -1,9 +1,11 @@
+import { Item } from "./components/Item.js";
+
 // eslint-disable-next-line no-undef
 var socket = io();
 var state;
 var redRGBLifeBar = {
     color: 230,
-    delta: 3,
+    delta: 15,
     activated: false
 }
 var pressed = {}; // remembers whether which keys are pressed
@@ -39,7 +41,7 @@ function setLifeBarColor() {
 
 function beep() {
     var audio = new Audio('audio/events/beep.mp3');
-    audio.volume = audioVolume/100;
+    audio.volume = audioVolume / 100;
     audio.play();
 }
 
@@ -66,7 +68,6 @@ function setState(localState) {
             document.getElementById('scoreBoard').style.visibility = 'visible';
             break;
     }
-    console.log('state set to ' + state);
 }
 
 function startGameButtonPressed() {
@@ -77,15 +78,12 @@ function startGameButtonPressed() {
 
 function keyReact(e) {
     if (state != 1) return;
-    // console.log('keyReact');
     if (e.type == 'keydown') {
-        console.log(e.keyCode);
         pressed[e.keyCode] = true;
         if (e.shiftKey) {
             pressed[-1] = true;
         }
     } else {
-        // console.log(e.keyCode);
         pressed[e.keyCode] = false;
         pressed[-1] = false;
     }
@@ -142,8 +140,6 @@ function getMouseRelativePosition() {
     var mouseY = mouse.y;
     var compareX = window.innerWidth / 2;
     var compareY = window.innerHeight / 2;
-    // console.log(mouseX, compareX);
-    // console.log(mouseY, compareY);
     var x = mouseX - compareX;
     var y = mouseY - compareY;
     return { x, y };
@@ -249,45 +245,44 @@ function settingsCheck() {
 }
 
 // adds an element to the game view in terms of percentages
-socket.on('addElementToGameView', (top, left, targetHeight, targetWidth, source, id, specialInfo) => {
+socket.on('addElementToGameView', (top, left, targetHeight, targetWidth, source, id, specialInfo, extraInfo) => {
     var element = document.getElementById(id);
     if (element == null) {
-        element = document.createElement('img');
+        if (specialInfo == 'Item') {
+            element = Item('/images/' + source);
+        }
+        else {
+            element = document.createElement('img');
+            element.setAttribute('src', '/images/' + source);
+        }
         element.id = id;
-        element.setAttribute('src', '/images/' + source);
         document.getElementById('elements').appendChild(element);
     }
     var proposedHeight = (targetHeight * window.innerHeight) / 100;
     var proposedWidth = (targetWidth * window.innerWidth) / 100;
-    element.setAttribute('height', proposedHeight);
-    element.setAttribute('width', proposedWidth);
     var topOffset = top - targetHeight / 2;
     var leftOffset = left - targetWidth / 2;
-    var styleAssign = 'z-index: -1; object-fit:fill; position: absolute; top: ' + topOffset + '%; left: ' + leftOffset + '%;';
+    var styleAssign = 'z-index: -1; object-fit: fill; position: absolute; top: ' + topOffset + '%; left: ' + leftOffset + '%;';
     element.style = styleAssign;
+    element.style.height = proposedHeight+'px';
+    element.style.width = proposedWidth+'px';
     if (specialInfo == 'Weapon') {
         element.style.zIndex = 5;
-        var mouseOffset = getMouseRelativePosition();
-        var xOffset = mouseOffset.x;
-        var yOffset = mouseOffset.y;
-        var angle = Math.atan(xOffset / yOffset) * (180 / Math.PI);
-        if (yOffset < 0) {
-            angle = -angle;
-        }
-        else {
-            angle = 180-angle;
-        }
-        // console.log(xOffset, yOffset, angle);
-        element.style.transform = 'rotate(' + angle + 'deg)';
+        element.style.transform = 'rotate(' + extraInfo + 'deg)';
     }
     else if (specialInfo == 'Player') {
         element.style.zIndex = 4;
+    }
+    else if (specialInfo == 'Item') {
+        element.style.zIndex = 3;
     }
 });
 
 socket.on('removeElementFromGameView', (id) => {
     var toRemove = document.getElementById(id);
-    if (toRemove != undefined) document.getElementById('elements').removeChild(toRemove);
+    if (toRemove != undefined) {
+        document.getElementById('elements').removeChild(toRemove);
+    }
 });
 
 socket.on('updateLightning', (x, y, radius, targetHeight, targetWidth) => {
@@ -330,7 +325,7 @@ socket.on('shotFired', (x1, y1, x2, y2) => {
     var alpha = 0;
     var delta = 0.08;
     var line = shotCanvas.getContext('2d');
-    var interval = setInterval(display, 1);
+    var interval = setInterval(display, 5);
 
     function display() {
         shotCanvas.height = window.innerHeight;
@@ -405,13 +400,27 @@ socket.on('launchHome', (matches) => {
     setState(0);
 });
 
+socket.on('sendMouseDegree', () => {
+    var mouseOffset = getMouseRelativePosition();
+    var xOffset = mouseOffset.x;
+    var yOffset = mouseOffset.y;
+    var angle = Math.atan(xOffset / yOffset) * (180 / Math.PI);
+    if (yOffset < 0) {
+        angle = -angle;
+    }
+    else {
+        angle = 180 - angle;
+    }
+    socket.emit('mouse_degree', angle);
+})
+
 socket.on('sendUserScreenRatio', () => {
     socket.emit('user_screen_ratio', window.innerWidth / window.innerHeight);
 });
 
 socket.on('updateWeaponInfo', (weapon) => {
     document.getElementById('weaponName').innerHTML = weapon;
-    document.getElementById('weaponImage').setAttribute('src', './images/weapons/'+weapon+'.svg');
+    document.getElementById('weaponImage').setAttribute('src', './images/weapons/' + weapon + '.svg');
 })
 
 socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) => {
@@ -508,7 +517,6 @@ function init() {
         if (Date.now() - lastInput > 3000 && state == 1 && e.keyCode == 13) {
             lastInput = Date.now();
             socket.emit('chat_message_sent', $('#chatInput').val());
-            console.log($('#chatInput').val());
             $('#chatInput').val('');
         }
     });
@@ -528,6 +536,9 @@ function init() {
             callStatus.microphoneActivated = false;
             document.getElementById('microphoneActivationImage').src = 'images/icons/microphone_off.svg';
         }
+    });
+    document.getElementById('backToHomeButton').addEventListener('click', () => {
+        setState(0);
     });
     initChangelog();
     document.getElementById('lobbyUI').addEventListener('click', () => {
@@ -575,6 +586,7 @@ function init() {
     });
     document.getElementById('settingsAudioVolumeSelection').value = audioVolume;
     setInterval(settingsCheck, 500);
+    setInterval(pickupItemCheck, 50);
 }
 
 setTimeout(init, 2);

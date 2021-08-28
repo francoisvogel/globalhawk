@@ -1,6 +1,6 @@
 #settingsButton {
     z-index: 99;
-    position: absolute;
+    position: fixed;
     top: 1%;
     bottom: 95%;
     left: 48%;
@@ -29,7 +29,8 @@
 
 #settingsTopBar {
     background-color: rgb(73, 14, 14);
-    padding: 5px;
+    height: 10%;
+    padding: 0px;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
@@ -44,14 +45,16 @@
 }
 
 #settingsHideButton {
-    height: 50%;
     background-color: yellow;
     border-radius: 50%;
     cursor: pointer;
 }
 
 #settingsData {
-    padding: 15px;
+    overflow: auto;
+    height: 90%;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .settingsSubtitle {

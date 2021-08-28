@@ -21,12 +21,14 @@ const Player = require('./app/models/Player');
 const Cloud = require('./app/models/Cloud');
 const Heal = require('./app/models/Heal');
 const Weapon = require('./app/models/Weapon');
+const Item = require('./app/models/Item');
 
 const totalHeight = process.env.TOTAL_HEIGHT;
 const totalWidth = process.env.TOTAL_WIDTH;
 
 class Match {
     constructor(localMode, localMatchNumber, localCodeName) {
+        console.log(localMode);
         this.matchNumber = localMatchNumber;
         this.players = [];
         this.elements = [];
@@ -127,6 +129,7 @@ class Match {
         this.players.forEach(function (i) {
             io.to(i.id).emit('updateBoostBar', i.refresh() * 100);
             io.to(i.id).emit('updateWeaponInfo', i.weapon);
+            io.to(i.id).emit('sendMouseDegree');
         });
         this.elements.forEach(function (i) {
             if (!i.immortal && i.life == 0 && !i.removed) {
@@ -144,8 +147,7 @@ class Match {
             for (var j = 0; j < this.elements.length; j++) if (this.elements[j].exists) {
                 var fromTop = (this.elements[j].x - (this.players[i].x - actualHeight / 2)) / actualHeight * 100;
                 var fromLeft = (this.elements[j].y - (this.players[i].y - actualWidth / 2)) / actualWidth * 100;
-                // console.log(i.id);
-                io.to(this.players[i].id).emit('addElementToGameView', Number(fromTop), Number(fromLeft), this.elements[j].height * 100 / actualHeight, this.elements[j].width * 100 / actualWidth, this.elements[j].code(), this.elements[j].id, this.elements[j].constructor.name);
+                io.to(this.players[i].id).emit('addElementToGameView', Number(fromTop), Number(fromLeft), this.elements[j].height * 100 / actualHeight, this.elements[j].width * 100 / actualWidth, this.elements[j].code(), this.elements[j].id, this.elements[j].constructor.name, this.elements[j].extraInfo);
             }
         }
     }
@@ -159,6 +161,9 @@ class Match {
         return true;
     }
     calculateFreeCoordinates() {
+        if (process.env.MODE == 'dev') {
+            return [totalHeight/2, totalWidth/2];
+        }
         var bestCoordinates = [totalHeight/2, totalWidth/2];
         var bestDistance = 0;
         var mersenneTwisterRandomNumberGenerator = new random.MersenneTwister(Date.now());
@@ -189,7 +194,9 @@ class Match {
         player.y = coordinates[1];
         this.players.push(player);
         this.elements.push(player); // elements contains all elements (drones, clouds, items)
-        this.elements.push(new Weapon(player));
+        var playerWeapon = new Weapon(player);
+        this.elements.push(playerWeapon);
+        player.weaponObject = playerWeapon;
         this.activePlayerCount++;
         io.to(this.matchNumber).emit('updatePlayerCount', this.players.length);
         io.to(this.matchNumber).emit('addChatComment', 'system', player.playerName + ' joined the match.');
@@ -208,9 +215,10 @@ class Match {
         for (let i = 0; i < this.elements.length; i++) if (this.elements[i].constructor.name == 'Weapon' && this.elements[i].player == player) {
             io.to(this.matchNumber).emit('removeElementFromGameView', this.elements[i].id);
             this.elements[i].life = 0;
-            this.elements.splice(i);
+            this.elements.splice(i, 1);
             break;
         }
+        this.elements.push(new Item(player.x, player.y, Weapon, player.weapon));
         io.to(this.matchNumber).emit('removeElementFromGameView', player.id);
         io.to(this.matchNumber).emit('updatePlayerCount', this.players.length);
         io.to(this.matchNumber).emit('addChatComment', 'system', player.playerName + ' left the match.');
@@ -394,10 +402,10 @@ io.on('connection', (socket) => {
             thisPlayer.playerName = localPlayerName;
         }
         if (matchCode == 1000) {
-            selectedMatch = matches[matches.length - 1];
             if (matches[matches.length-1].activeMatch == false) {
-                matches[matches.length-1] = new Match();
+                matches[matches.length-1] = new Match('br', 1000);
             }
+            selectedMatch = matches[matches.length - 1];
         }
         else if (matchCode < arena.length) {
             selectedMatch = arena[matchCode];
@@ -414,6 +422,10 @@ io.on('connection', (socket) => {
     socket.on('user_screen_ratio', (localRatio) => {
         if (!sanityCheck()) return;
         thisPlayer.ratio = localRatio;
+    });
+    socket.on('mouse_degree', (angle) => {
+        if (!sanityCheck()) return;
+        thisPlayer.weaponObject.refreshElement(angle);
     });
     socket.on('player_move', (xShift, yShift, boostActivated) => {
         if (!sanityCheck()) return;
@@ -462,6 +474,7 @@ io.on('connection', (socket) => {
         thisPlayer.exists = false;
         selectedMatch.removePlayer(thisPlayer);
         selectedMatch.oneRemainingCheck();
+        console.log('rem');
     });
     // eslint-disable-next-line no-unused-vars
     socket.on('disconnect', (key) => {
@@ -470,7 +483,8 @@ io.on('connection', (socket) => {
             thisPlayer.exists = false;
             selectedMatch.removePlayer(thisPlayer);
         }
-        if (process.env.MODE != 'dev') selectedMatch.oneRemainingCheck();
+        selectedMatch.oneRemainingCheck();
+        console.log('rem');
     });
     socket.on('shot_fired', (xDir, yDir) => {
         if (!sanityCheck()) return;

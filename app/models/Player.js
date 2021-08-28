@@ -18,6 +18,7 @@ class Player {
         this.y;
         this.shape = 'rect';
         this.weapon = 'laser'; // originally no weapon is equipped
+        this.weaponObject; // stores link to the object with class Weapon
         this.playerName = "BuzzDroner"; // default name
         this.immortal = false;
         this.removed = false; // indicated whether element has been removed of player view
