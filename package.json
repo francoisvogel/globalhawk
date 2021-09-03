@@ -27,5 +27,8 @@
     },
     "scripts": {
         "start": "node index.js"
+    },
+    "engines": {
+        "node": "14.7.3"
     }
 }
