@@ -24,6 +24,13 @@ var keybindings = {
     right: 'D'.charCodeAt(0),
     down: 'S'.charCodeAt(0),
     left: 'A'.charCodeAt(0),
+    pickup: 'E'.charCodeAt(0)
+}
+var pickedUp = {
+    id: null,
+    hoveredTime: 0, // in ms
+    pickupTime: 0, // in ms
+    timeBetweenPickups: 200 // ms
 }
 
 function setLifeBarColor() {
@@ -113,7 +120,26 @@ function keyStatusServerCommunication() {
 }
 
 function pickupItemCheck() {
-    
+    var currentPickedUpId = null;
+    Array.from(document.querySelectorAll(".item")).forEach(function (i) {
+        var coordinateRectangle = i.getBoundingClientRect();
+        if (coordinateRectangle.top <= window.innerHeight/2 && window.innerHeight/2 <= coordinateRectangle.bottom && coordinateRectangle.left <= window.innerWidth/2 && window.innerWidth/2 <= coordinateRectangle.right) {
+            currentPickedUpId = i.id;
+        }
+    });
+    if (currentPickedUpId != pickedUp.id) {
+        $('#pickupPopup').css('visibility', 'hidden');
+    }
+    pickedUp.id = currentPickedUpId;
+    if (pickedUp.id != null && Date.now()-pickedUp.pickupTime >= pickedUp.timeBetweenPickups) {
+        if (pressed[keybindings.pickup]) {
+            $('#pickupPopup').css('visibility', 'hidden');
+            socket.emit('item_pickup', pickedUp.id);
+        }
+        else {
+            $('#pickupPopup').css('visibility', 'visible');
+        }
+    }
 }
 
 function userClicked() {
@@ -246,6 +272,13 @@ function settingsCheck() {
         keybindings.right = str.toUpperCase().charCodeAt(0);
         $('#settingsKeyRightInput').val('');
     }
+    document.getElementById('settingsKeyPickupValue').innerHTML = String.fromCharCode(keybindings.pickup);
+    if ($('#settingsKeyPickupInput').val().length == 1) {
+        let str = $('#settingsKeyPickupInput').val();
+        keybindings.pickup = str.toUpperCase().charCodeAt(0);
+        $('#settingsKeyPickupInput').val('');
+    }
+    document.getElementById('pickupKey').innerHTML = String.fromCharCode(keybindings.pickup).toLocaleLowerCase();
 }
 
 // adds an element to the game view in terms of percentages
@@ -278,7 +311,7 @@ socket.on('addElementToGameView', (top, left, targetHeight, targetWidth, source,
         element.style.zIndex = 4;
     }
     else if (specialInfo == 'Item') {
-        element.style.zIndex = 3;
+        element.style.zIndex = 5;
     }
 });
 
@@ -425,7 +458,7 @@ socket.on('sendUserScreenRatio', () => {
 
 socket.on('updateWeaponInfo', (weapon) => {
     document.getElementById('weaponName').innerHTML = weapon;
-    document.getElementById('weaponImage').setAttribute('src', './images/weapons/' + weapon + '.svg');
+    document.getElementById('weaponImage').setAttribute('src', './images/weapons/' + weapon + '_icon.svg');
 })
 
 const imageEventRefresh = 1; // ms
@@ -457,7 +490,6 @@ socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) =
     document.getElementById('imageEvents').appendChild(newElement);
     var elapsedTime = 0;
     var interval = setInterval(dynamicDisplay, imageEventRefresh);
-    console.log('added to refresh');
 });
 
 const addChatCommentRefresh = 10; // ms

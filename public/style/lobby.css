@@ -65,7 +65,7 @@
 
 .lobbyPopupTitle {
     font-size: 40px;
-    background-color:rgb(18, 73, 87);
+    background-color: rgb(18, 73, 87);
     left: 0;
     right: 0;
     border-radius: 5px;
@@ -143,4 +143,55 @@
 #startGameButton:hover {
     color: yellowgreen;
     transform: scale(1.1) skew(10deg, 5deg);
+}
+
+#lobbyTypeWriterContainer {
+    position: absolute;
+    top: 10%;
+    bottom: 85%;
+    left: 30%;
+    right: 35%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: max-content;
+    max-width: 35%;
+}
+
+#lobbyTypeWriter {
+    animation: appear 12s/* this number must be same one as in typewriter.js for dynamic innerHTML update */
+    steps(30, end) infinite, caret 0.75s infinite;
+    font-size: 20px;
+    height: 25px;
+    white-space: nowrap;
+    border-right: 3px solid;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+@keyframes appear {
+    0% {
+        width: 0%;
+    }
+    40% {
+        width: 100%;
+    }
+    60% {
+        width: 100%;
+    }
+    90% {
+        width: 0%;
+    }
+    100% {
+        width: 0%;
+    }
+}
+
+@keyframes caret {
+    0% {
+        border-color: transparent;
+    }
+    100% {
+        border-color: gainsboro;
+    }
 }
