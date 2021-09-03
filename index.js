@@ -107,7 +107,6 @@ class Match {
                 }
             }
         }
-        // (❁´◡`❁)
     }
     healCheck() {
         for (var i = 0; i < this.players.length; i++) {
