@@ -5,8 +5,7 @@
 #lobbyUI {
     height: 100%;
     width: 100%;
-    background: rgb(25, 169, 146);
-    background: radial-gradient(circle, rgba(25, 169, 146, 1) 0%, rgba(37, 112, 8, 1) 100%);
+    animation: dynamicBackground 10s infinite;
     background-color: white;
     width: 100%;
     position: absolute;
@@ -30,7 +29,7 @@
     border: 5px double turquoise;
     border-radius: 20px;
     font-size: 15px;
-    background: radial-gradient(circle, rgba(25, 169, 146, 1) 0%, rgba(37, 112, 8, 1) 100%);
+    animation: dynamicBackground 3s infinite;
 }
 
 .lobbyInfoSubTitle {
@@ -193,5 +192,20 @@
     }
     100% {
         border-color: gainsboro;
+    }
+}
+
+@keyframes dynamicBackground {
+    0% {
+        background: radial-gradient(circle, rgba(25, 169, 146, 1) 0%, rgba(37, 112, 8, 1) 100%);
+        filter: brightness(90%);
+    }
+    50% {
+        background: radial-gradient(circle, rgba(25, 169, 146, 1) 0%, rgba(37, 112, 8, 1) 100%);
+        filter: brightness(110%);
+    }
+    100% {
+        background: radial-gradient(circle, rgba(25, 169, 146, 1) 0%, rgba(37, 112, 8, 1) 100%);
+        filter: brightness(90%);
     }
 }

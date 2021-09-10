@@ -1,19 +1,9 @@
 {
     "versions": [
         {
-            "id": "1.0.3",
-            "codeName": "V^^^",
-            "description": "cool laucnejwk,,,,,dfnwiedniefniefniefndnowndi3nd dn3 j"
-        },
-        {
-            "id": "1.0.1",
-            "codeName": "Estart day relase",
-            "description": "sdkkwwlek e e happy to release verions of new hame"
-        },
-        {
             "id": "1.0.0",
-            "codeName": "Launched version",
-            "description": "First launch. enjiy ur gane"
+            "codeName": "One release",
+            "description": "We're glad to announce that globalhawk.io is now finally online. Currently, the game supports 2 modes : Battle Royal and Arena. In the first mode, players compete in a shrinking lightning storm surrounding them and pushing them towards the center of the map. And Arena is an open mode where anybody can join and compete to reach a destroyed count record."
         }
     ]
 }
