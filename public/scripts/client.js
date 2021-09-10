@@ -123,7 +123,7 @@ function pickupItemCheck() {
     var currentPickedUpId = null;
     Array.from(document.querySelectorAll(".item")).forEach(function (i) {
         var coordinateRectangle = i.getBoundingClientRect();
-        if (coordinateRectangle.top <= window.innerHeight/2 && window.innerHeight/2 <= coordinateRectangle.bottom && coordinateRectangle.left <= window.innerWidth/2 && window.innerWidth/2 <= coordinateRectangle.right) {
+        if (coordinateRectangle.top <= window.innerHeight / 2 && window.innerHeight / 2 <= coordinateRectangle.bottom && coordinateRectangle.left <= window.innerWidth / 2 && window.innerWidth / 2 <= coordinateRectangle.right) {
             currentPickedUpId = i.id;
         }
     });
@@ -131,7 +131,7 @@ function pickupItemCheck() {
         $('#pickupPopup').css('visibility', 'hidden');
     }
     pickedUp.id = currentPickedUpId;
-    if (pickedUp.id != null && Date.now()-pickedUp.pickupTime >= pickedUp.timeBetweenPickups) {
+    if (pickedUp.id != null && Date.now() - pickedUp.pickupTime >= pickedUp.timeBetweenPickups) {
         if (pressed[keybindings.pickup]) {
             $('#pickupPopup').css('visibility', 'hidden');
             socket.emit('item_pickup', pickedUp.id);
@@ -461,23 +461,15 @@ socket.on('updateWeaponInfo', (weapon) => {
     document.getElementById('weaponImage').setAttribute('src', './images/weapons/' + weapon + '_icon.svg');
 })
 
-const imageEventRefresh = 1; // ms
-const imageEventShowTime = 200; // ms
+const imageEventShowTime = 300; // ms
 socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) => {
-    function dynamicDisplay() {
-        elapsedTime += imageEventRefresh;
-        var fadeDegree = elapsedTime;
-        if (elapsedTime >= imageEventShowTime) {
-            document.getElementById('imageEvents').removeChild(newElement);
-            clearInterval(interval);
-        } else if (elapsedTime >= imageEventShowTime / 2) {
-            fadeDegree = imageEventShowTime - elapsedTime;
-        }
-        newElement.style.opacity = fadeDegree / (imageEventShowTime / 2);
+    function removeImageEvent() {
+        document.getElementById('imageEvents').removeChild(newElement);
     }
     var newElement = document.createElement('img');
     newElement.setAttribute('src', 'images/events/' + source);
     newElement.id = id;
+    newElement.className = 'imageEvent';
     document.getElementById('elements').appendChild(newElement);
     var proposedHeight = (targetHeight * window.innerHeight) / 100;
     var proposedWidth = (targetWidth * window.innerWidth) / 100;
@@ -488,8 +480,7 @@ socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) =
     var styleAssign = /*'background-size: cover; box-shadow: 0px 10px 20px -5px rgba(0,0,0,.8); background: linear-gradient(#004092, #020202, transparent), url(\'images/'+source+'\') no-repeat center;*/ ' z-index: -1; object-fit: fill; position: absolute; top: ' + topOffset + '%; left: ' + leftOffset + '%;';
     newElement.style = styleAssign;
     document.getElementById('imageEvents').appendChild(newElement);
-    var elapsedTime = 0;
-    var interval = setInterval(dynamicDisplay, imageEventRefresh);
+    setTimeout(removeImageEvent, imageEventShowTime);
 });
 
 const addChatCommentRefresh = 10; // ms
