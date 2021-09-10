@@ -133,8 +133,10 @@ function pickupItemCheck() {
     pickedUp.id = currentPickedUpId;
     if (pickedUp.id != null && Date.now() - pickedUp.pickupTime >= pickedUp.timeBetweenPickups) {
         if (pressed[keybindings.pickup]) {
+            pickedUp.pickupTime = Date.now();
             $('#pickupPopup').css('visibility', 'hidden');
             socket.emit('item_pickup', pickedUp.id);
+            console.log('item_picked_up');
         }
         else {
             $('#pickupPopup').css('visibility', 'visible');
@@ -283,17 +285,24 @@ function settingsCheck() {
 
 // adds an element to the game view in terms of percentages
 socket.on('addElementToGameView', (top, left, targetHeight, targetWidth, source, id, specialInfo, extraInfo) => {
+    source = '/images/' + source;
     var element = document.getElementById(id);
     if (element == null) {
+        console.log('added', id);
         if (specialInfo == 'Item') {
-            element = Item('/images/' + source);
+            element = Item(source);
         }
         else {
             element = document.createElement('img');
-            element.setAttribute('src', '/images/' + source);
+            element.setAttribute('src', source);
         }
         element.id = id;
         document.getElementById('elements').appendChild(element);
+    }
+    else {
+        if (element.getAttribute('src') != source) {
+            element.setAttribute('src', source);
+        }
     }
     var proposedHeight = (targetHeight * window.innerHeight) / 100;
     var proposedWidth = (targetWidth * window.innerWidth) / 100;
@@ -320,6 +329,7 @@ socket.on('removeElementFromGameView', (id) => {
     if (toRemove != undefined) {
         document.getElementById('elements').removeChild(toRemove);
     }
+    console.log('removed', id);
 });
 
 socket.on('updateLightning', (x, y, radius, targetHeight, targetWidth) => {

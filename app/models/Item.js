@@ -20,6 +20,8 @@ class Item {
         this.shape = 'circle';
         this.id = localX+localY+Math.random()+"_item";
         this.obstacle = false;
+        this.life = 1; // anything but ZERO
+        this.removed = false;
     }
     code() {
         if (this.item == Weapon) {

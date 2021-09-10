@@ -1,7 +1,10 @@
-require("dotenv").config();
+require('dotenv').config();
+const path = require('path');
 
 const totalHeight = process.env.TOTAL_HEIGHT;
 const totalWidth = process.env.TOTAL_WIDTH;
+
+const WeaponsConstants = require(path.join(__dirname, '../../', process.env.DB, 'constants', 'Weapons'));
 
 class Player {
     constructor(localID, localMatch) {
@@ -17,8 +20,8 @@ class Player {
         this.x;
         this.y;
         this.shape = 'rect';
-        this.weapon = 'laser'; // originally no weapon is equipped
-        this.weaponObject; // stores link to the object with class Weapon
+        this.weapon = WeaponsConstants['allWeapons'][Math.floor(WeaponsConstants['allWeapons'].length*Math.random())]; // originally no weapon is equipped
+        this.weaponObject; // stores link to the object with class Weapon (i.e. a pointer to the object with class Weapon that is broadcasted to all sockets and displayed)
         this.playerName = "BuzzDroner"; // default name
         this.immortal = false;
         this.removed = false; // indicated whether element has been removed of player view

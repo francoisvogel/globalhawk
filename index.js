@@ -24,13 +24,14 @@ const Weapon = require('./app/models/Weapon');
 const Item = require('./app/models/Item');
 
 const totalHeight = process.env.TOTAL_HEIGHT;
-const totalWidth = process.env.TOTAL_WIDTH;
+const totalWidth = process.env.TOTAL_WIDTH
 
 class Match {
     constructor(localMode, localMatchNumber, localCodeName) {
         console.log(localMode);
         this.matchNumber = localMatchNumber;
         this.players = [];
+        this.queuedRemovePlayers = []; // players to be removed on next update call
         this.elements = [];
         this.mode = localMode;
         if (localCodeName == undefined) this.codeName = ''; // optional
@@ -124,6 +125,10 @@ class Match {
         }
     }
     refreshView() {
+        this.queuedRemovePlayers.forEach(function (i) {
+            this.removePlayer(i);
+        });
+        this.queuedRemovePlayers = [];
         this.healCheck();
         if (this.mode == 'br') this.updateLightningRadius();
         this.players.forEach(function (i) {
@@ -135,6 +140,7 @@ class Match {
             if (!i.immortal && i.life == 0 && !i.removed) {
                 io.emit('removeElementFromGameView', i.id);
                 i.removed = true;
+                i.exists = false;
             }
             if (i.refreshElement != undefined) i.refreshElement();
         });
@@ -200,6 +206,10 @@ class Match {
         this.activePlayerCount++;
         io.to(this.matchNumber).emit('updatePlayerCount', this.players.length);
         io.to(this.matchNumber).emit('addChatComment', 'system', player.playerName + ' joined the match.');
+    }
+    // adds player to waiting list of players to be removed
+    queuePlayerToRemove(player) {
+        this.queuedRemovePlayers.push(player);
     }
     removePlayer(player) {
         console.log('player removed');
@@ -410,7 +420,7 @@ io.on('connection', (socket) => {
         else if (matchCode < arena.length) {
             selectedMatch = arena[matchCode];
         }
-        else { // hacking attempt
+        if (selectedMatch == undefined) { // hacking attempt
             socket.disconnect();
             console.log('prevented hacking attempt');
         }
@@ -500,6 +510,20 @@ io.on('connection', (socket) => {
         var secondX = thisPlayer.x + xDir * k;
         var secondY = thisPlayer.y + yDir * k;
         selectedMatch.processShot(thisPlayer.x, thisPlayer.y, secondX, secondY, thisPlayer);
+    });
+    socket.on('item_pickup', (itemId) => {
+        var pickedUpItem;
+        for (var i = 0; i < selectedMatch.elements.length; i++) if (selectedMatch.elements[i].id == itemId) {
+            pickedUpItem = selectedMatch.elements[i];
+            // selectedMatch.elements.splice(i, 1);
+            break;
+        }
+        if (pickedUpItem == undefined) return;
+        pickedUpItem.life = 0;
+        pickedUpItem.exists = false;
+        var newItem = new Item(pickedUpItem.x, pickedUpItem.y, Weapon, thisPlayer.weapon);
+        thisPlayer.weapon = pickedUpItem.weaponName;
+        selectedMatch.elements.push(newItem);
     });
     socket.on('chat_message_sent', (message) => {
         if (!sanityCheck()) return;
