@@ -15,6 +15,14 @@
         {
             "id": 3,
             "codeName": "Los Angeles, USA"
+        },
+        {
+            "id": 4,
+            "codeName": "Amsterdam, The Netherlands"
+        },
+        {
+            "id": 5,
+            "codeName": "San Francisco, USA"
         }
     ]
 }

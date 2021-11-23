@@ -584,29 +584,30 @@ function init() {
         setState(0);
     });
     initChangelog();
-    document.getElementById('lobbyUI').addEventListener('click', () => {
+    document.getElementById('lobbyDarkOverlay').style.visibility = 'hidden';
+    document.getElementById('lobbyDarkOverlay').addEventListener('click', () => {
         document.getElementById('changelog').style.visibility = 'hidden';
         document.getElementById('bugBounty').style.visibility = 'hidden';
         document.getElementById('ourTeam').style.visibility = 'hidden';
-        document.getElementById('lobbyUI').style.filter = '';
+        document.getElementById('lobbyDarkOverlay').style.visibility = 'hidden';
     });
     document.getElementById('changelogButton').addEventListener('click', () => {
         document.getElementById('changelog').style.visibility = 'visible';
         document.getElementById('bugBounty').style.visibility = 'hidden';
         document.getElementById('ourTeam').style.visibility = 'hidden';
-        document.getElementById('lobbyUI').style.filter = 'blur(5px)';
+        document.getElementById('lobbyDarkOverlay').style.visibility = 'visible';
     });
     document.getElementById('bugBountyButton').addEventListener('click', () => {
         document.getElementById('changelog').style.visibility = 'hidden';
         document.getElementById('bugBounty').style.visibility = 'visible';
         document.getElementById('ourTeam').style.visibility = 'hidden';
-        document.getElementById('lobbyUI').style.filter = 'blur(5px)';
+        document.getElementById('lobbyDarkOverlay').style.visibility = 'visible';
     });
     document.getElementById('ourTeamButton').addEventListener('click', () => {
         document.getElementById('changelog').style.visibility = 'hidden';
         document.getElementById('bugBounty').style.visibility = 'hidden';
         document.getElementById('ourTeam').style.visibility = 'visible';
-        document.getElementById('lobbyUI').style.filter = 'blur(5px)';
+        document.getElementById('lobbyDarkOverlay').style.visibility = 'visible';
     });
     onkeydown = onkeyup = keyReact;
     document.addEventListener('mousemove', (event) => {
