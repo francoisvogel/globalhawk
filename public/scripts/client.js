@@ -243,6 +243,10 @@ function initChangelog() {
     }
 }
 
+function getBarLifeID(id) {
+    return id+'_bar_life';
+}
+
 function settingsCheck() {
     var selectedAudioVolume = document.getElementById('settingsAudioVolumeSelection').value;
     if (audioVolume != selectedAudioVolume) {
@@ -469,7 +473,25 @@ socket.on('sendUserScreenRatio', () => {
 socket.on('updateWeaponInfo', (weapon) => {
     document.getElementById('weaponName').innerHTML = weapon;
     document.getElementById('weaponImage').setAttribute('src', './images/weapons/' + weapon + '_icon.svg');
-})
+});
+
+// id is the id of the player that has to be updated
+// life is the level of life out of 100 of this player
+socket.on('updatePlayerLifeBar', (id, life) => {
+    const rect = document.getElementById(id).getBoundingClientRect();
+    const barID = getBarLifeID(id); // matching id for every life bar
+    var el = document.getElementById(barID);
+    if (el == undefined) {
+        el = document.createElement('div');
+        el.classList = 'playerLifeBar';
+        document.getElementById('playerLifeBars').appendChild(el);
+    }
+    var midX = rect.left+rect.width/2.0;
+    var midY = rect.top+rect.height/2.0;
+    midY += 100; // px
+    el.style.top = midY;
+    el.style.left = midX;
+});
 
 const imageEventShowTime = 300; // ms
 socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) => {
