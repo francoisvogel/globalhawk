@@ -25,6 +25,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
 }
 
 .playerLifeBar > div {
@@ -38,7 +39,7 @@
 
 .playerLifeBar > p {
     color: yellow;
-    font-size: 10px;
+    font-size: 9.5px;
     text-align: center;
     z-index: 31;
 }

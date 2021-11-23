@@ -4,6 +4,8 @@ const path = require('path');
 const totalHeight = process.env.TOTAL_HEIGHT;
 const totalWidth = process.env.TOTAL_WIDTH;
 
+const nameGenerator = require('../scripts/nameGenerator.js');
+
 const WeaponsConstants = require(path.join(__dirname, '../../', process.env.DB, 'constants', 'Weapons'));
 
 class Player {
@@ -22,7 +24,7 @@ class Player {
         this.shape = 'rect';
         this.weapon = WeaponsConstants['allWeapons'][Math.floor(WeaponsConstants['allWeapons'].length*Math.random())]; // originally no weapon is equipped
         this.weaponObject; // stores link to the object with class Weapon (i.e. a pointer to the object with class Weapon that is broadcasted to all sockets and displayed)
-        this.playerName = "BuzzDroner"; // default name
+        this.playerName = nameGenerator(); // default name
         this.immortal = false;
         this.removed = false; // indicated whether element has been removed of player view
         this.destroyedCount = 0; // nb of killed players

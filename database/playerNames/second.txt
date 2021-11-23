@@ -1,0 +1,10 @@
+Player
+Droner
+Mega
+King
+Queen
+Pro
+Expert
+Master
+Grandmaster
+Winner
