@@ -498,6 +498,17 @@ socket.on('updatePlayerLifeBar', (id, life) => {
     document.getElementById(barID+'2').style.width = String(life)+'%';
 });
 
+// updatePlayerLifeBar must be called first imperatively !!!
+socket.on('updatePlayerName', (id, name) => {
+    var barID = getBarLifeID(id);
+    if (document.getElementById(barID+'3') == undefined) {
+        let innerText = document.createElement('p'); // this must be a p as this is used in game.css
+        innerText.id = barID+'3'; // adding '3' is the convention of the name inside the panel
+        document.getElementById(barID).appendChild(innerText);
+    }
+    document.getElementById(barID+'3').innerHTML = name;
+});
+
 const imageEventShowTime = 300; // ms
 socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) => {
     function removeImageEvent() {

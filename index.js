@@ -158,9 +158,8 @@ class Match {
                 io.to(this.players[i].id).emit('addElementToGameView', Number(fromTop), Number(fromLeft), this.elements[j].height * 100 / actualHeight, this.elements[j].width * 100 / actualWidth, this.elements[j].code(), this.elements[j].id, this.elements[j].constructor.name, this.elements[j].extraInfo);
             }
             for (let j = 0; j < this.players.length; j++) if (this.players[j].exists) {
-                // var fromTop = (this.players[j].x - (this.players[i].x - actualHeight / 2)) / actualHeight * 100;
-                // var fromLeft = (this.players[j].y - (this.players[i].y - actualWidth / 2)) / actualWidth * 100;
                 io.to(this.players[i].id).emit('updatePlayerLifeBar', this.players[j].id, this.players[j].life);
+                io.to(this.players[i].id).emit('updatePlayerName', this.players[j].id, this.players[j].playerName);
             }
         }
         if (atLeastOneRemoved) this.oneRemainingCheck();

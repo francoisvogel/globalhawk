@@ -16,17 +16,31 @@
 
 .playerLifeBar {
     transform: translate(-50%, -50%); /* to center the element by giving x and y positions for the center */
-    height: 10px;
+    height: 12px;
     background-color: black;
     position: absolute;
-    border-radius: 5px;
+    border-radius: 6px;
     border: 1px solid black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .playerLifeBar > div {
+    z-index: 30;
+    position: absolute;
+    left: 0;
     height: 100%;
     background-color: gray;
     border-radius: 5px;
+}
+
+.playerLifeBar > p {
+    color: yellow;
+    font-size: 10px;
+    text-align: center;
+    z-index: 31;
 }
 
 #pickupPopup {
