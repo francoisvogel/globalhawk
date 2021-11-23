@@ -125,9 +125,11 @@ class Match {
         }
     }
     refreshView() {
-        this.queuedRemovePlayers.forEach(function (i) {
-            this.removePlayer(i);
-        });
+        var atLeastOneRemoved = false;
+        for (let i = 0; i < this.queuedRemovePlayers.length; i++) {
+            this.removePlayer(this.queuedRemovePlayers[i]);
+            atLeastOneRemoved = true;
+        }
         this.queuedRemovePlayers = [];
         this.healCheck();
         if (this.mode == 'br') this.updateLightningRadius();
@@ -150,17 +152,18 @@ class Match {
             io.to(this.players[i].id).emit('sendUserScreenRatio');
             var actualHeight = Math.sqrt(this.players[i].scope / this.players[i].ratio);
             var actualWidth = actualHeight * this.players[i].ratio;
-            for (var j = 0; j < this.elements.length; j++) if (this.elements[j].exists) {
+            for (let j = 0; j < this.elements.length; j++) if (this.elements[j].exists) {
                 var fromTop = (this.elements[j].x - (this.players[i].x - actualHeight / 2)) / actualHeight * 100;
                 var fromLeft = (this.elements[j].y - (this.players[i].y - actualWidth / 2)) / actualWidth * 100;
                 io.to(this.players[i].id).emit('addElementToGameView', Number(fromTop), Number(fromLeft), this.elements[j].height * 100 / actualHeight, this.elements[j].width * 100 / actualWidth, this.elements[j].code(), this.elements[j].id, this.elements[j].constructor.name, this.elements[j].extraInfo);
             }
-            for (var j = 0; j < this.players.length; j++) if (this.players[j].exists) {
+            for (let j = 0; j < this.players.length; j++) if (this.players[j].exists) {
                 // var fromTop = (this.players[j].x - (this.players[i].x - actualHeight / 2)) / actualHeight * 100;
                 // var fromLeft = (this.players[j].y - (this.players[i].y - actualWidth / 2)) / actualWidth * 100;
                 io.to(this.players[i].id).emit('updatePlayerLifeBar', this.players[j].id, this.players[j].life);
             }
         }
+        if (atLeastOneRemoved) this.oneRemainingCheck();
     }
     // caller is an optional parameter to be used in case an object is moving and if it overlaps with itself we shouldn't consider it
     noOverlapWithOtherElement(x1, y1, x2, y2, caller) {
@@ -487,8 +490,7 @@ io.on('connection', (socket) => {
         if (!sanityCheck()) return;
         socket.leave(selectedMatch.matchNumber);
         thisPlayer.exists = false;
-        selectedMatch.removePlayer(thisPlayer);
-        selectedMatch.oneRemainingCheck();
+        selectedMatch.queuePlayerToRemove(thisPlayer);
         console.log('rem');
     });
     // eslint-disable-next-line no-unused-vars
@@ -496,9 +498,8 @@ io.on('connection', (socket) => {
         if (!sanityCheck()) return;
         if (thisPlayer != null) {
             thisPlayer.exists = false;
-            selectedMatch.removePlayer(thisPlayer);
+            if (selectedMatch != undefined) selectedMatch.queuePlayerToRemove(thisPlayer);
         }
-        selectedMatch.oneRemainingCheck();
         console.log('rem');
     });
     socket.on('shot_fired', (xDir, yDir) => {

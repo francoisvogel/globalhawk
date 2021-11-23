@@ -32,7 +32,7 @@ function isProfanatory(text) {
     words.forEach(function (i) {
         if (!i.length || i.length >= 20) return;
         dictWords.forEach(function (j) {
-            if (levenshteinDistance(i, j) <= 1) {
+            if (levenshteinDistance(i, j) <= 0) {
                 profanatory = true;
                 return;
             }

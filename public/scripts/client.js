@@ -480,17 +480,22 @@ socket.on('updateWeaponInfo', (weapon) => {
 socket.on('updatePlayerLifeBar', (id, life) => {
     const rect = document.getElementById(id).getBoundingClientRect();
     const barID = getBarLifeID(id); // matching id for every life bar
-    var el = document.getElementById(barID);
-    if (el == undefined) {
-        el = document.createElement('div');
+    if (document.getElementById(barID) == undefined) {
+        let el = document.createElement('div');
+        el.id = barID;
         el.classList = 'playerLifeBar';
         document.getElementById('playerLifeBars').appendChild(el);
+        let innerEl = document.createElement('div'); // this must be a div as this is used in game.css
+        innerEl.id = barID+'2'; // concatenate a 2 to this id to signify the inner bar
+        document.getElementById(barID).appendChild(innerEl);
     }
     var midX = rect.left+rect.width/2.0;
-    var midY = rect.top+rect.height/2.0;
-    midY += 100; // px
-    el.style.top = midY;
-    el.style.left = midX;
+    var posY = rect.bottom;
+    posY += 10; // px
+    document.getElementById(barID).style.top = String(posY)+'px';
+    document.getElementById(barID).style.left = String(midX)+'px';
+    document.getElementById(barID).style.width = String(2*rect.width)+'px';
+    document.getElementById(barID+'2').style.width = String(life)+'%';
 });
 
 const imageEventShowTime = 300; // ms

@@ -15,6 +15,15 @@
     <script type="module" src="/scripts/client.js"></script>
     <script type="module" src="/scripts/components/Item.js"></script>
     <script src="/scripts/functions/typewriter.js"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K9TFKFWN3R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-K9TFKFWN3R');
+    </script>
 </head>
 
 <body id="body">
@@ -28,8 +37,9 @@
                 </p>
                 <p class="lobbyPopupElement">
                     Chief Executive Officer & Founder - <i style="color: rgb(186, 218, 129)">Francois Vogel</i><br><br>
-                    Chief Communications Officer - <i style="color: rgb(186, 218, 129)">Mohamed Mansor</i><br><br>
-                    Deputy Chief Communications Officer - <i style="color: rgb(186, 218, 129)">Domenico Sorrentino</i><br><br>
+                    Chief Marketing Officer - <i style="color: rgb(186, 218, 129)">Mohamed Mansor</i><br><br>
+                    Deputy Chief Marketing Officer - <i style="color: rgb(186, 218, 129)">Domenico
+                        Sorrentino</i><br><br>
                     Chief Commercial Officer - <i style="color: rgb(186, 218, 129)">Philip Menn</i>
                 </p>
                 <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24">
@@ -153,14 +163,16 @@
             </div>
         </div>
         <div id="scoreBoard"
-            style="visibility: hidden; background-color: white; height: 100%; width: 100%; position:fixed; top: 0;">
+            style="visibility: hidden; background-color: white; height: 100%; width: 100%; position: fixed; top: 0;">
             <div id="scoreBoardCentralColumn">
                 <div id="endAnnouncement"></div>
                 <button id="backToHomeButton" onclick="setState(0);">Back to lobby</button>
-                <i>Stats with account synchronization, custom matchmaking & spectating, along many other features are
+                <i style="text-align: center;">Stats with account synchronization, custom matchmaking & spectating,
+                    along many other features are
                     coming
                     soon</i>
-                <i>For those wanting to play on their smartphones, an Android version is under development!</i>
+                <i style="text-align: center;">For those wanting to play on their smartphones, an Android version is
+                    under development!</i>
             </div>
             <div class="socialMediaShareColumn">
                 <a><img src="./images/icons/instagram.svg" class="socialMediaShare"></a>
