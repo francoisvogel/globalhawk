@@ -151,10 +151,32 @@ body {
     transform: scale(1.1) skew(10deg, 5deg);
 }
 
+#lobbyBanner {
+    position: absolute;
+    top: 6%;
+    bottom: 87%;
+    left: 30%;
+    right: 35%;
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+}
+
+#lobbyBanner > p {
+    position: absolute;
+    text-align: center;
+    animation: around 4s infinite;
+    animation-timing-function: linear;
+    font-size: 30px;
+    width: min-content;
+}
+
 #lobbyTypeWriterContainer {
     position: absolute;
-    top: 10%;
-    bottom: 85%;
+    top: 13%;
+    bottom: 82%;
     left: 30%;
     right: 35%;
     display: flex;
@@ -182,6 +204,16 @@ body {
     width: 100%;
     background-color: black;
     filter: opacity(0.5);
+}
+
+@keyframes around {
+    0% {
+        left: -50%;
+        
+    }
+    100% {
+        left: 100%;
+    }
 }
 
 @keyframes appear {

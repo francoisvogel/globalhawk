@@ -648,24 +648,35 @@ function init() {
         document.getElementById('changelog').style.visibility = 'hidden';
         document.getElementById('bugBounty').style.visibility = 'hidden';
         document.getElementById('ourTeam').style.visibility = 'hidden';
+        document.getElementById('privacyPolicy').style.visibility = 'hidden';
         document.getElementById('lobbyDarkOverlay').style.visibility = 'hidden';
     });
     document.getElementById('changelogButton').addEventListener('click', () => {
         document.getElementById('changelog').style.visibility = 'visible';
         document.getElementById('bugBounty').style.visibility = 'hidden';
         document.getElementById('ourTeam').style.visibility = 'hidden';
+        document.getElementById('privacyPolicy').style.visibility = 'hidden';
         document.getElementById('lobbyDarkOverlay').style.visibility = 'visible';
     });
     document.getElementById('bugBountyButton').addEventListener('click', () => {
         document.getElementById('changelog').style.visibility = 'hidden';
         document.getElementById('bugBounty').style.visibility = 'visible';
         document.getElementById('ourTeam').style.visibility = 'hidden';
+        document.getElementById('privacyPolicy').style.visibility = 'hidden';
         document.getElementById('lobbyDarkOverlay').style.visibility = 'visible';
     });
     document.getElementById('ourTeamButton').addEventListener('click', () => {
         document.getElementById('changelog').style.visibility = 'hidden';
         document.getElementById('bugBounty').style.visibility = 'hidden';
         document.getElementById('ourTeam').style.visibility = 'visible';
+        document.getElementById('privacyPolicy').style.visibility = 'hidden';
+        document.getElementById('lobbyDarkOverlay').style.visibility = 'visible';
+    });
+    document.getElementById('privacyPolicyButton').addEventListener('click', () => {
+        document.getElementById('changelog').style.visibility = 'hidden';
+        document.getElementById('bugBounty').style.visibility = 'hidden';
+        document.getElementById('ourTeam').style.visibility = 'hidden';
+        document.getElementById('privacyPolicy').style.visibility = 'visible';
         document.getElementById('lobbyDarkOverlay').style.visibility = 'visible';
     });
     document.addEventListener('mousemove', (event) => {
