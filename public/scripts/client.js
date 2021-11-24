@@ -693,9 +693,11 @@ function init() {
         document.getElementById('settings').style.visibility = 'visible';
         document.getElementById('staticElements').style.pointerEvents = 'none';
     });
-    document.getElementById('settingsHideButton').addEventListener('click', () => {
-        document.getElementById('settings').style.visibility = 'hidden';
-        document.getElementById('staticElements').style.pointerEvents = 'auto';
+    document.addEventListener('click', function(event) {
+        if ((!document.getElementById('settings').contains(event.target) && !document.getElementById('settingsButton').contains(event.target)) || document.getElementById('settingsHideButton').contains(event.target)) {
+            document.getElementById('settings').style.visibility = 'hidden';
+            document.getElementById('staticElements').style.pointerEvents = 'auto';
+        }
     });
     document.getElementById('settingsAudioVolumeSelection').value = audioVolume;
     setInterval(settingsCheck, 500);
