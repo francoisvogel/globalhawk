@@ -20,6 +20,9 @@ class Heal {
         this.id = hash+'heal'; // a good id
         this.obstacle = false;
     }
+    getMajColor() {
+        return 'red';
+    }
     code() {
         return 'backgrounds/heal.svg';
     }

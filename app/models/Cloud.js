@@ -20,6 +20,9 @@ class Cloud {
         this.id = hash+'cloud'; // a good id
         this.obstacle = true;
     }
+    getMajColor() {
+        return 'gray';
+    }
     code() {
         return 'backgrounds/cloud.svg';
     }

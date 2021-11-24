@@ -46,7 +46,7 @@ class Match {
         // random generator
         var randomNumberGeneratorMersenneTwister = new random.MersenneTwister(Date.now());
         // add heal objects
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 10; i++) {
             let circlePositionX = randomNumberGeneratorMersenneTwister.genrand_int31() % totalHeight;
             let circlePositionY = randomNumberGeneratorMersenneTwister.genrand_int31() % totalWidth;
             let circleRadius = randomNumberGeneratorMersenneTwister.genrand_int31() % 500 + 4000;
@@ -66,7 +66,7 @@ class Match {
             }
         }
         // create clouds
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 300; i++) {
             let circlePositionX = randomNumberGeneratorMersenneTwister.genrand_int31() % totalHeight;
             let circlePositionY = randomNumberGeneratorMersenneTwister.genrand_int31() % totalWidth;
             let circleRadius = randomNumberGeneratorMersenneTwister.genrand_int31() % 500 + 1000;
@@ -147,6 +147,7 @@ class Match {
             if (i.refreshElement != undefined) i.refreshElement();
         });
         for (var i = 0; i < this.players.length; i++) if (this.players[i].exists) {
+            io.to(this.players[i].id).emit('updatePlayerPosition', this.players[i].y / totalWidth * 100, this.players[i].x / totalHeight * 100);
             io.to(this.players[i].id).emit('updateLife', this.players[i].life);
             if (this.players[i] == undefined) continue; // strange bug
             io.to(this.players[i].id).emit('sendUserScreenRatio');
@@ -175,16 +176,16 @@ class Match {
     }
     calculateFreeCoordinates() {
         if (process.env.MODE == 'dev') {
-            return [totalHeight/2, totalWidth/2];
+            return [totalHeight / 2, totalWidth / 2];
         }
-        var bestCoordinates = [totalHeight/2, totalWidth/2];
+        var bestCoordinates = [totalHeight / 2, totalWidth / 2];
         var bestDistance = 0;
         var mersenneTwisterRandomNumberGenerator = new random.MersenneTwister(Date.now());
         for (let i = 0; i < 100; i++) {
-            var localCoordinates = [mersenneTwisterRandomNumberGenerator.genrand_int31()%(totalHeight-new Player().height)+new Player().height/2, mersenneTwisterRandomNumberGenerator.genrand_int31()%(totalWidth-new Player().width)+new Player().width/2];
+            var localCoordinates = [mersenneTwisterRandomNumberGenerator.genrand_int31() % (totalHeight - new Player().height) + new Player().height / 2, mersenneTwisterRandomNumberGenerator.genrand_int31() % (totalWidth - new Player().width) + new Player().width / 2];
             var collision = false;
             for (let j = 0; j < this.elements.length; j++) {
-                if (this.elements[j].obstacle && geometry.euclideanDistance(this.elements[j].x, this.elements[j].y, localCoordinates[0], localCoordinates[1]) <= this.elements[j].height+this.elements[j].width) {
+                if (this.elements[j].obstacle && geometry.euclideanDistance(this.elements[j].x, this.elements[j].y, localCoordinates[0], localCoordinates[1]) <= this.elements[j].height + this.elements[j].width) {
                     collision = true;
                     break;
                 }
@@ -206,13 +207,20 @@ class Match {
         player.x = coordinates[0];
         player.y = coordinates[1];
         this.players.push(player);
-        this.elements.push(player); // elements contains all elements (drones, clouds, items)
+        this.elements.push(player); // elements contains all elements (drones, clouds, items, etc.)
         var playerWeapon = new Weapon(player);
         this.elements.push(playerWeapon);
         player.weaponObject = playerWeapon;
         this.activePlayerCount++;
         io.to(this.matchNumber).emit('updatePlayerCount', this.players.length);
         io.to(this.matchNumber).emit('addChatComment', 'system', player.playerName + ' joined the match.');
+        io.to(player.id).emit('startAddingElementsToMap');
+        for (var i = 0; i < this.elements.length; i++) {
+            if (this.elements[i].immortal && !this.elements[i].static) {
+                io.to(player.id).emit('addElementToMap', this.elements[i].y / totalWidth * 100, this.elements[i].x / totalHeight * 100, this.elements[i].radius / Math.sqrt(totalHeight * totalWidth) * 100, this.elements[i].getMajColor());
+            }
+        }
+        io.to(player.id).emit('allElementsAddedToMap');
     }
     // adds player to waiting list of players to be removed
     queuePlayerToRemove(player) {
@@ -328,9 +336,9 @@ class Match {
             var actualWidth = actualHeight * i.ratio;
             var fromTopX = (x - (i.x - actualHeight / 2)) / actualHeight * 100;
             var fromLeftY = (y - (i.y - actualWidth / 2)) / actualWidth * 100;
-            var imageHeight = targetHeight*100/actualHeight;
-            var imageWidth = targetWidth*100/actualWidth;
-            io.to(i.id).emit('showImageEvent', fromTopX, fromLeftY, imageHeight, imageWidth, source+'.png', x+'_'+y+'_'+targetHeight+'_'+targetWidth+'_'+source+'_imageEvent');
+            var imageHeight = targetHeight * 100 / actualHeight;
+            var imageWidth = targetWidth * 100 / actualWidth;
+            io.to(i.id).emit('showImageEvent', fromTopX, fromLeftY, imageHeight, imageWidth, source + '.png', x + '_' + y + '_' + targetHeight + '_' + targetWidth + '_' + source + '_imageEvent');
         });
     }
     oneRemainingCheck() {
@@ -351,7 +359,7 @@ function refreshViewAllMatches() {
 }
 
 function initArenaMatches() {
-    const jsonString = fs.readFileSync(process.env.DB+'/arena.json');
+    const jsonString = fs.readFileSync(process.env.DB + '/arena.json');
     const jsonData = JSON.parse(jsonString);
     jsonData.arena.forEach(function (i) {
         arena.push(new Match('arena', i.id, i.codeName));
@@ -405,22 +413,22 @@ io.on('connection', (socket) => {
     for (var i = 0; i < arena.length; i++) {
         matchesClientData.push({
             id: arena[i].matchNumber,
-            codeName: 'Arena: '+arena[i].codeName,
+            codeName: 'Arena: ' + arena[i].codeName,
             playerCount: arena[i].players.length
         });
     }
     socket.emit('launchHome', matchesClientData);
     var thisPlayer = null;
     var selectedMatch;
-    socket.on('game_start_button_pressed', (localPlayerName, matchCode) => {      
+    socket.on('game_start_button_pressed', (localPlayerName, matchCode) => {
         console.log('game_start_button_pressed');
         thisPlayer = new Player(socket.id);
         if (localPlayerName != '') {
             thisPlayer.playerName = localPlayerName;
         }
         if (matchCode == 1000) {
-            if (matches[matches.length-1].activeMatch == false) {
-                matches[matches.length-1] = new Match('br', 1000);
+            if (matches[matches.length - 1].activeMatch == false) {
+                matches[matches.length - 1] = new Match('br', 1000);
             }
             selectedMatch = matches[matches.length - 1];
         }
@@ -474,7 +482,7 @@ io.on('connection', (socket) => {
                 var yImage = thisPlayer.y + yShift * thisPlayer.width / 2;
                 selectedMatch.emitImageEvent(xImage, yImage, 1000, 1000, 'collision');
                 if (thisPlayer.reduceLife(5)) {
-                    io.to(selectedMatch.id).emit('addChatComment', 'system', thisPlayer.playerName+' was destroyed by an collision.');
+                    io.to(selectedMatch.id).emit('addChatComment', 'system', thisPlayer.playerName + ' was destroyed by an collision.');
                     io.to(thisPlayer.id).emit('gameFinishedForPlayer', false);
                 }
                 var ticks = 1;
@@ -543,7 +551,7 @@ io.on('connection', (socket) => {
         if (!sanityCheck()) return;
         var newData = data.split(';');
         newData[0] = 'data:audio/ogg;';
-        newData = newData[0]+newData[1];
+        newData = newData[0] + newData[1];
         socket.to(selectedMatch.matchNumber).emit('voiceMessage', newData);
     })
 });
