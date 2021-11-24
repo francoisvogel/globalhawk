@@ -18,20 +18,21 @@ var audioVolume = 100; // in percentage
 var mouse = {
     x: 0,
     y: 0
-}
+};
 var keybindings = {
     up: 'W'.charCodeAt(0),
     right: 'D'.charCodeAt(0),
     down: 'S'.charCodeAt(0),
     left: 'A'.charCodeAt(0),
-    pickup: 'E'.charCodeAt(0)
-}
+    pickup: 'E'.charCodeAt(0),
+    undercover: 'U'.charCodeAt(0)
+};
 var pickedUp = {
     id: null,
     hoveredTime: 0, // in ms
     pickupTime: 0, // in ms
     timeBetweenPickups: 200 // ms
-}
+};
 
 function setLifeBarColor() {
     if (state != 1 || !redRGBLifeBar.activated) return;
@@ -85,7 +86,7 @@ function startGameButtonPressed() {
 }
 
 function keyReact(e) {
-    if (state != 1) return;
+    // if (state != 1) return;
     if (e.type == 'keydown') {
         pressed[e.keyCode] = true;
         if (e.shiftKey) {
@@ -95,6 +96,7 @@ function keyReact(e) {
         pressed[e.keyCode] = false;
         pressed[-1] = false;
     }
+    console.log('UNDERCOVER BINDING PRESSED: ', pressed[keybindings.undercover]);
 }
 
 function keyStatusServerCommunication() {
@@ -247,6 +249,16 @@ function getBarLifeID(id) {
     return id+'_bar_life';
 }
 
+var lastPress = 0;
+const timeBetweenUndercoverPresses = 200;
+function undercoverUpdate() {
+    if (pressed[keybindings.undercover] && Date.now()-lastPress >= timeBetweenUndercoverPresses) {
+        if (document.getElementById('undercover').style.visibility == 'hidden') document.getElementById('undercover').style.visibility = 'visible';
+        else document.getElementById('undercover').style.visibility = 'hidden';
+        lastPress = Date.now();
+    }
+}
+
 function settingsCheck() {
     var selectedAudioVolume = document.getElementById('settingsAudioVolumeSelection').value;
     if (audioVolume != selectedAudioVolume) {
@@ -285,6 +297,13 @@ function settingsCheck() {
         $('#settingsKeyPickupInput').val('');
     }
     document.getElementById('pickupKey').innerHTML = String.fromCharCode(keybindings.pickup).toLocaleLowerCase();
+    document.getElementById('settingsKeyUndercoverValue').innerHTML = String.fromCharCode(keybindings.undercover);
+    if ($('#settingsKeyUndercoverInput').val().length == 1) {
+        let str = $('#settingsKeyUndercoverInput').val();
+        keybindings.undercover = str.toUpperCase().charCodeAt(0);
+        $('#settingsKeyUndercoverInput').val('');
+    }
+    document.getElementById('undercoverKey').innerHTML = String.fromCharCode(keybindings.undercover).toLocaleLowerCase();
 }
 
 // adds an element to the game view in terms of percentages
@@ -494,7 +513,7 @@ socket.on('updatePlayerLifeBar', (id, life) => {
     posY += 10; // px
     document.getElementById(barID).style.top = String(posY)+'px';
     document.getElementById(barID).style.left = String(midX)+'px';
-    document.getElementById(barID).style.width = String(2*rect.width)+'px';
+    document.getElementById(barID).style.width = String(2.5*rect.width)+'px';
     document.getElementById(barID+'2').style.width = String(life)+'%';
 });
 
@@ -591,6 +610,8 @@ socket.on('voiceMessage', (data) => {
 });
 
 function init() {
+    setInterval(undercoverUpdate, 20);
+    onkeydown = onkeyup = keyReact;
     setState(0);
     document.getElementById('game').addEventListener('click', userClicked);
     document.getElementById('startGameButton').onclick = function () { startGameButtonPressed() };
@@ -647,7 +668,6 @@ function init() {
         document.getElementById('ourTeam').style.visibility = 'visible';
         document.getElementById('lobbyDarkOverlay').style.visibility = 'visible';
     });
-    onkeydown = onkeyup = keyReact;
     document.addEventListener('mousemove', (event) => {
         mouse.x = event.x;
         mouse.y = event.y;

@@ -16,10 +16,10 @@
 
 .playerLifeBar {
     transform: translate(-50%, -50%); /* to center the element by giving x and y positions for the center */
-    height: 12px;
+    height: 13px;
     background-color: black;
     position: absolute;
-    border-radius: 6px;
+    border-radius: 7.5px;
     border: 1px solid black;
     display: flex;
     flex-direction: column;
@@ -39,7 +39,7 @@
 
 .playerLifeBar > p {
     color: yellow;
-    font-size: 9.5px;
+    font-size: 11px;
     text-align: center;
     z-index: 31;
 }

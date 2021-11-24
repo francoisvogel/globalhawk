@@ -43,3 +43,12 @@ a {
     color: yellowgreen;
     opacity: 1;
 }
+
+#undercover {
+    z-index: 200;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    padding: 5px;
+}

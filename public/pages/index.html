@@ -27,6 +27,9 @@
 </head>
 
 <body id="body">
+    <div id="undercover" style="visibility: hidden;">
+        <p style="color: yellow; font-size: 12px;">Undercover mode activated, press '<span id="undercoverKey"></span>' to deactivate.</p>
+    </div>
     <div id="staticElements"
         style="z-index: 90; position: fixed; top: 0; bottom: 0; left: 0; right: 0; transition: 1s;">
         <div id="lobby">
@@ -237,6 +240,15 @@
                     </div>
                     <div>
                         Type new key: <span><input type="text" id="settingsKeyPickupInput" maxlength="1"
+                                class="settingsKeyInput yellowPlaceholder"></span>
+                    </div>
+                </div>
+                <div class="settingsKeyContainer">
+                    <p class="settingsKeyValue">Undercover</p>
+                    <div>Current Key: <span id="settingsKeyUndercoverValue" class="settingsKeyCurrent">?</span>
+                    </div>
+                    <div>
+                        Type new key: <span><input type="text" id="settingsKeyUndercoverInput" maxlength="1"
                                 class="settingsKeyInput yellowPlaceholder"></span>
                     </div>
                 </div>
