@@ -630,9 +630,9 @@ socket.on('addImportantComment', (content) => {
 });
 
 socket.on('voiceMessage', (data) => {
-    var audio = new Audio(data);
-    audio.volume = audioVolume / 100;
-    audio.play();
+    // var audio = new Audio(data);
+    // audio.volume = audioVolume / 100;
+    // audio.play();
 });
 
 function init() {
