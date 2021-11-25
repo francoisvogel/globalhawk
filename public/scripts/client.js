@@ -96,7 +96,7 @@ function keyReact(e) {
         pressed[e.keyCode] = false;
         pressed[-1] = false;
     }
-    console.log('UNDERCOVER BINDING PRESSED: ', pressed[keybindings.undercover]);
+    // console.log('UNDERCOVER BINDING PRESSED: ', pressed[keybindings.undercover]);
 }
 
 function keyStatusServerCommunication() {
