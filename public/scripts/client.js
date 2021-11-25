@@ -554,25 +554,25 @@ socket.on('showImageEvent', (top, left, targetHeight, targetWidth, source, id) =
 // here the map global map to be displayed in the corner is created
 
 socket.on('startAddingElementsToMap', () => {
-    // document.getElementById('map').innerHTML = '<svg version="1.1" id="mapInside" xmlns="http://www.w3.org/2000/svg" height="100%" width="100%" fill="green"></svg>';
-    // document.getElementById('mapInside').innerHTML = '<rect width="100%" height="100%" fill="green" />'
-    // document.getElementById('mapInside').innerHTML += '<circle id="mapPlayerPosition" r="1%" fill="black" />';
+    document.getElementById('map').innerHTML = '<svg version="1.1" id="mapInside" xmlns="http://www.w3.org/2000/svg" height="100%" width="100%" fill="green"></svg>';
+    document.getElementById('mapInside').innerHTML = '<rect width="100%" height="100%" fill="green" />'
+    document.getElementById('mapInside').innerHTML += '<circle id="mapPlayerPosition" r="1%" fill="black" />';
 });
 
 // x is a percentage, y is a percentage and r is a percentage
 socket.on('addElementToMap', (x, y, r, color) => {
-    // var circle = '<circle cx='+x+'% cy='+y+'% r='+r+'% fill="'+color+'" fill-opacity="0.5" />';
-    // document.getElementById('mapInside').innerHTML += circle;
+    var circle = '<circle cx='+x+'% cy='+y+'% r='+r+'% fill="'+color+'" fill-opacity="1" />';
+    document.getElementById('mapInside').innerHTML += circle;
 });
 
 socket.on('allElementsAddedToMap', () => {
-    // console.log('map generated successfully');
+    console.log('map generated successfully');
 });
 
 // x and y given in percentage
 socket.on('updatePlayerPosition', (x, y) => {
-    // document.getElementById('mapPlayerPosition').setAttribute('cx', x+'%');
-    // document.getElementById('mapPlayerPosition').setAttribute('cy', y+'%');
+    document.getElementById('mapPlayerPosition').setAttribute('cx', x+'%');
+    document.getElementById('mapPlayerPosition').setAttribute('cy', y+'%');
 })
 
 

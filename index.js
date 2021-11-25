@@ -217,7 +217,7 @@ class Match {
         io.to(player.id).emit('startAddingElementsToMap');
         for (var i = 0; i < this.elements.length; i++) {
             if (this.elements[i].immortal && !this.elements[i].static) {
-                // io.to(player.id).emit('addElementToMap', this.elements[i].y / totalWidth * 100, this.elements[i].x / totalHeight * 100, this.elements[i].radius / Math.sqrt(totalHeight * totalWidth) * 100, this.elements[i].getMajColor());
+                io.to(player.id).emit('addElementToMap', this.elements[i].y / totalWidth * 100, this.elements[i].x / totalHeight * 100, this.elements[i].radius / Math.sqrt(totalHeight * totalWidth) * 100, this.elements[i].getMajColor());
             }
         }
         io.to(player.id).emit('allElementsAddedToMap');
