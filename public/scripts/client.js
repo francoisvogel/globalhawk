@@ -66,6 +66,7 @@ function setState(localState) {
             document.getElementById('shots').innerHTML = '';
             document.getElementById('elements').innerHTML = '';
             document.getElementById('chat').innerHTML = '';
+            document.getElementById('playerLifeBars').innerHTML = '';
             pressed = {};
             document.getElementById('lobby').style.visibility = 'hidden';
             document.getElementById('game').style.visibility = 'visible';
